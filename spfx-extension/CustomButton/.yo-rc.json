@@ -1,6 +1,6 @@
 {
   "@microsoft/generator-sharepoint": {
-    "version": "1.11.0",
+    "version": "1.14.0",
     "libraryName": "custom-button",
     "libraryId": "9b017829-7962-491f-8b49-43b3a3b1985f",
     "environment": "spo",

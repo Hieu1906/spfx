@@ -54,6 +54,7 @@ jspm_packages/
 
 # next.js build output
 .next
+release
 
 # OS X temporary files
 .DS_Store
@@ -66,3 +67,7 @@ common/autoinstallers/*/.npmrc
 
 # Heft
 .heft
+
+# Styles Generated Code
+*.scss.ts
+*.scss.d.ts
