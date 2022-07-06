@@ -1,0 +1,31 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "tree-navigation-application-customizer": {
+      "components": [
+        {
+          "entrypoint": "./lib/extensions/treeNavigation/TreeNavigationApplicationCustomizer.js",
+          "manifest": "./src/extensions/treeNavigation/TreeNavigationApplicationCustomizer.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {
+    "antd": {
+      "path": "https://cdnjs.cloudflare.com/ajax/libs/antd/3.26.19/antd-with-locales.min.js",
+      "globalName": "antd"
+    },
+    "lodash": {
+      "path": "https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.15/lodash.min.js",
+      "globalName": "_"
+    },
+    "moment": {
+      "path": "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.26.0/moment-with-locales.min.js",
+      "globalName": "moment"
+    }
+  },
+  "localizedResources": {
+    "TreeNavigationApplicationCustomizerStrings": "lib/extensions/treeNavigation/loc/{locale}.js"
+  }
+}

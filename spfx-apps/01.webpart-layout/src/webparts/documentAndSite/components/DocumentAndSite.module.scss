@@ -1,0 +1,44 @@
+.documentAndSite {
+  width: 100%;
+  padding: 25px;
+  min-height: 200px;
+  &__title {
+    width: 100%;
+    color: "[theme: themePrimary, default: #0078d7]" !important;
+    background: #f2f2f2;
+    font-size: 16px;
+    padding: 8px;
+  }
+  &__listItem {
+    padding: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: 100%;
+    &__item {
+      width: 300px;
+      display: flex !important;
+      align-items: center;
+      margin-bottom: 30px;
+      cursor: pointer;
+      &__img {
+        height: 80px;
+        width: 80px;
+        margin-right: 20px;
+      }
+      &__text {
+        color: #428bca;
+        text-decoration: none;
+        display: inline-block;
+        border: 1px solid transparent;
+        vertical-align: middle;
+        max-height: 72px;
+        width: calc(100% - 106px);
+        overflow: hidden;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}

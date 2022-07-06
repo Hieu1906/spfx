@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/s-KaiNet/spfx-fast-serve/master/schema/config.latest.schema.json",
+  "cli": {
+    "isLibraryComponent": false
+  },
+  "serve": {
+    "openUrl": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/adms/SitePages/Search.aspx?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js",
+    "fullScreenErrors": true
+  }
+}

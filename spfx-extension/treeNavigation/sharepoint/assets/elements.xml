@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/">
+    <CustomAction
+        Title="TreeNavigation"
+        Location="ClientSideExtension.ApplicationCustomizer"
+        ClientSideComponentId="4baf3468-072e-47bf-81c7-de508d313a0f"
+        ClientSideComponentProperties="{&quot;testMessage&quot;:&quot;Test message&quot;}">
+    </CustomAction>
+</Elements>

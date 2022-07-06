@@ -1,0 +1,13 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "version": "1.11.0",
+    "libraryName": "01-webpart-layout",
+    "libraryId": "b87e5fe9-6637-4e57-ab79-8c3f8a053f17",
+    "environment": "spo",
+    "packageManager": "pnpm",
+    "isCreatingSolution": false,
+    "isDomainIsolated": false,
+    "componentType": "webpart",
+    "framework": "react"
+  }
+}

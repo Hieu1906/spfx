@@ -1,0 +1,29 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/serve.schema.json",
+  "port": 4321,
+  "https": true,
+  "serveConfigurations": {
+    "default": {
+      "pageUrl": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/adms",
+      "customActions": {
+        "4baf3468-072e-47bf-81c7-de508d313a0f": {
+          "location": "ClientSideExtension.ApplicationCustomizer",
+          "properties": {
+            "testMessage": "Test message"
+          }
+        }
+      }
+    },
+    "treeNavigation": {
+      "pageUrl": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/adms",
+      "customActions": {
+        "4baf3468-072e-47bf-81c7-de508d313a0f": {
+          "location": "ClientSideExtension.ApplicationCustomizer",
+          "properties": {
+            "testMessage": "Test message"
+          }
+        }
+      }
+    }
+  }
+}

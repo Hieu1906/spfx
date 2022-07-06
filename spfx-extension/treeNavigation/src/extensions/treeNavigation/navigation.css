@@ -1,0 +1,12 @@
+#drag__element {
+  background-color: #f2f2f2;
+  width: 6px;
+  cursor: w-resize;
+  height: auto;
+}
+.ms-SelectionZone {
+  margin-top: 23px !important;
+}
+#right_element {
+  width: 100%;
+}

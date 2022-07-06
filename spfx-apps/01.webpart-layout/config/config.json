@@ -1,0 +1,48 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "homepage-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/homepage/HomepageWebPart.js",
+          "manifest": "./src/webparts/homepage/HomepageWebPart.manifest.json"
+        }
+      ]
+    },
+    "document-and-site-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/documentAndSite/DocumentAndSiteWebPart.js",
+          "manifest": "./src/webparts/documentAndSite/DocumentAndSiteWebPart.manifest.json"
+        }
+      ]
+    },
+    "search-documents-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/searchDocuments/SearchDocumentsWebPart.js",
+          "manifest": "./src/webparts/searchDocuments/SearchDocumentsWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {
+ 
+    "lodash": {
+      "path": "https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.15/lodash.min.js",
+      "globalName": "_"
+    },
+    "moment": {
+      "path": "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.26.0/moment-with-locales.min.js",
+      "globalName": "moment"
+    },
+     "jquery": "https://code.jquery.com/jquery-3.5.1.min.js"
+  },
+  "localizedResources": {
+    "HomepageWebPartStrings": "lib/webparts/homepage/loc/{locale}.js",
+    "DocumentAndSiteWebPartStrings": "lib/webparts/documentAndSite/loc/{locale}.js",
+    "SearchDocumentsWebPartStrings": "lib/webparts/searchDocuments/loc/{locale}.js",
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js"
+  }
+}
