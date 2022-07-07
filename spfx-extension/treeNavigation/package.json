@@ -22,7 +22,8 @@
     "@pnp/sp": "~2.0.6",
     "moment": "~2.26.0",
     "antd": "^3.26.19",
-    "@microsoft/sp-loader": "~1.14.0"
+    "@microsoft/sp-loader": "~1.14.0",
+    "@microsoft/gulp-core-build-sass": "~4.15.6"
   },
   "devDependencies": {
     "@microsoft/sp-build-web": "1.14.0",
@@ -37,7 +38,8 @@
     "@types/lodash": "~4.14.155",
     "@types/react": "16.9.49",
     "@types/react-dom": "16.9.8",
-    "@microsoft/rush-stack-compiler-3.9": "0.4.18",
-    "spfx-fast-serve-helpers": "~1.14.0"
+   "@microsoft/rush-stack-compiler-3.9": "0.4.18",
+    "spfx-fast-serve-helpers": "~1.14.0",
+    "webpack-cli": "4.4.0"
   }
 }

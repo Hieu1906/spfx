@@ -1,6 +1,6 @@
 import { cloneDeep, sortBy, uniq } from "lodash";
 import { sp } from "@pnp/sp";
-import { Modal, Spin, Tree } from "antd";
+import { Button, Input, Modal, Spin, Tree } from "antd";
 import { AntTreeNode, AntTreeNodeExpandedEvent } from "antd/lib/tree";
 import * as moment from "moment";
 import * as React from "react";
@@ -292,9 +292,112 @@ export default class SideNav extends BaseComponent<
       </Tree>
     );
   }
+
+  NavigateSearchWp(valueSearch?: string) {
+    let urlSplitted = window.location.href.match("^[^?]*")![0].split("/");
+    console.log(urlSplitted);
+    if (valueSearch.length > 0) {
+      window.open(
+        `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/adms/SitePages/Search.aspx?key=${this.state.valueSearch}&year=${urlSplitted[8]}`,
+        "_self"
+      );
+    } else {
+      window.open(
+        `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/adms/SitePages/Search.aspx?year=${urlSplitted[8]}`,
+        "_self"
+      );
+    }
+  }
   public render() {
     return (
       <div className={styles.navigationTree__container}>
+        {this.state.isSearched ? (
+          <div
+            className={
+              styles.navigationTree__container__tree__search__wrapperSearchInput
+            }
+          >
+            <Input
+              size="default"
+              value={this.state.valueSearch}
+              onPressEnter={(e) => {
+                e.preventDefault();
+                this.NavigateSearchWp(this.state.valueSearch);
+              }}
+              onChange={(e) => {
+                this.setState({
+                  valueSearch: e.target.value,
+                });
+              }}
+              autoFocus={true}
+              placeholder="Nhập từ Khóa"
+              className={
+                styles.navigationTree__container__tree__search__wrapperSearchInput__input
+              }
+            />
+            <div
+              className={
+                styles.navigationTree__container__tree__search__wrapperSearchInput__buttons
+              }
+            >
+              <Button
+                onClick={() => {
+                  this.setState({
+                    isSearched: false,
+                  });
+                }}
+                style={{ marginLeft: 10 }}
+                type="danger"
+                size="small"
+              >
+                Hủy
+              </Button>
+              <Button
+                size="small"
+                onClick={() => {
+                  this.NavigateSearchWp(this.state.valueSearch);
+                }}
+                style={{ marginLeft: 10 }}
+                type="primary"
+              >
+                Tìm kiếm
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div
+            className={styles.navigationTree__container__tree__search}
+            onClick={() => {
+              this.setState({
+                isSearched: true,
+              });
+            }}
+          >
+            <svg
+              className={styles.navigationTree__container__tree__search__icon}
+              width="13"
+              height="13"
+              viewBox="0 0 13 13"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                className={
+                  styles.navigationTree__container__tree__search__icon__fill
+                }
+                d="M11.8125 11.5391L8.67188 8.39844C9.35156 7.57812 9.72656 6.52344 9.72656 5.375C9.72656 2.70312 7.52344 0.5 4.85156 0.5C2.15625 0.5 0 2.70312 0 5.375C0 8.07031 2.17969 10.25 4.85156 10.25C5.97656 10.25 7.03125 9.875 7.875 9.19531L11.0156 12.3359C11.1328 12.4531 11.2734 12.5 11.4375 12.5C11.5781 12.5 11.7188 12.4531 11.8125 12.3359C12.0469 12.125 12.0469 11.7734 11.8125 11.5391ZM1.125 5.375C1.125 3.3125 2.78906 1.625 4.875 1.625C6.9375 1.625 8.625 3.3125 8.625 5.375C8.625 7.46094 6.9375 9.125 4.875 9.125C2.78906 9.125 1.125 7.46094 1.125 5.375Z"
+                fill="#096DD9"
+              />
+            </svg>
+
+            <span
+              className={styles.navigationTree__container__tree__search__title}
+            >
+              {" "}
+              Tìm kiếm
+            </span>
+          </div>
+        )}
         {this.state.dataSource.map((item) => this.renderViewNavigation(item))}
       </div>
     );
