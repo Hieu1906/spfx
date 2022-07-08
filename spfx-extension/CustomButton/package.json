@@ -21,10 +21,10 @@
     "react-dom": "16.9.0",
     "@pnp/sp": "~2.0.6",
     "moment": "~2.26.0",
+    "lodash": "~4.17.21",
     "antd": "^3.26.19",
     "@microsoft/sp-loader": "~1.14.0",
-    "office-ui-fabric-react": "~7.188.0",
-    "@uifabric/utilities": "~7.34.1"
+    "@pnp/spfx-controls-react": "v2"
   
   },
   "devDependencies": {

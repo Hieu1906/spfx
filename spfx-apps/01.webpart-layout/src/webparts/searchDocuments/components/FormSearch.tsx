@@ -1,36 +1,34 @@
-import * as React from "react";
-import styles from "./SearchDocuments.module.scss";
-import { Button, DatePicker, Form, Input, message, Select, Spin } from "antd";
-import { BaseComponent } from "../../common/components/BaseComponent";
-import { chiNhanhService } from "../../common/services/chiNhanhService";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
-import { FormComponentProps } from "antd/lib/form/Form";
-import { ChiNhanh } from "../../common/models/ChiNhanh";
-import * as moment from "moment";
-import { duAnService } from "../../common/services/duAnService";
-import { DuAn } from "../../common/models/DuAn";
-import { boPhanService } from "../../common/services/boPhanService";
-import { BoPhan } from "../../common/models/BoPhan";
-import { nhaCungCapService } from "../../common/services/nhaCungCapService";
-import { NhaCungCap } from "../../common/models/NhaCungCap";
-import { nhomCTService } from "../../common/services/nhomChungTuService";
-import { NhomChungTu } from "../../common/models/NhomChungTu";
-import { loaiCTKTService } from "../../common/services/loaiChungTuKeToanService";
-import { LoaiChungTuKeToan } from "../../common/models/LoaiChungTuKeToan";
-import { loaiCTService } from "../../common/services/loaiChungTuService";
-import { LoaiChungTu } from "../../common/models/LoaiChungTu";
-import { maCKService } from "../../common/services/maChungKhoanService";
-import { MaChungKhoan } from "../../common/models/MaChungKhoan";
-import {
-  tKNHService,
-  TKNHService,
-} from "../../common/services/taiKhoanNganHangService";
-import { TaiKhoanNganHang } from "../../common/models/TaiKhoanNganHang";
 import {
   PeoplePicker,
-  PrincipalType,
+  PrincipalType
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
+import { Button, DatePicker, Form, Input, message, Select, Spin } from "antd";
+import { FormComponentProps } from "antd/lib/form/Form";
+import * as moment from "moment";
 import { IPersonaProps } from "office-ui-fabric-react";
+import * as React from "react";
+import { BaseComponent } from "../../common/components/BaseComponent";
+import { BoPhan } from "../../common/models/BoPhan";
+import { ChiNhanh } from "../../common/models/ChiNhanh";
+import { DuAn } from "../../common/models/DuAn";
+import { LoaiChungTu } from "../../common/models/LoaiChungTu";
+import { LoaiChungTuKeToan } from "../../common/models/LoaiChungTuKeToan";
+import { MaChungKhoan } from "../../common/models/MaChungKhoan";
+import { NhaCungCap } from "../../common/models/NhaCungCap";
+import { NhomChungTu } from "../../common/models/NhomChungTu";
+import { TaiKhoanNganHang } from "../../common/models/TaiKhoanNganHang";
+import { chiNhanhService } from "../../common/services/chiNhanhService";
+import { duAnService } from "../../common/services/duAnService";
+import { loaiCTKTService } from "../../common/services/loaiChungTuKeToanService";
+import { loaiCTService } from "../../common/services/loaiChungTuService";
+import { maCKService } from "../../common/services/maChungKhoanService";
+import { nhaCungCapService } from "../../common/services/nhaCungCapService";
+import { nhomCTService } from "../../common/services/nhomChungTuService";
+import {
+  tKNHService
+} from "../../common/services/taiKhoanNganHangService";
+import styles from "./SearchDocuments.module.scss";
 
 interface FormSearchProps extends FormComponentProps {
   context: WebPartContext;
@@ -83,6 +81,8 @@ export class FormSearchComp extends BaseComponent<
   FormSearchProps,
   FormSearchState
 > {
+  protected peoplePickerRef: React.RefObject<PeoplePicker> = React.createRef();
+
   constructor(props: FormSearchProps) {
     super(props);
     this.state = {
@@ -103,7 +103,7 @@ export class FormSearchComp extends BaseComponent<
         loading: true,
       });
       await this.loadMetaData(this.state.yearSelected);
-      await this.getBoPhan();
+
       this.setState({
         loading: false,
       });
@@ -234,14 +234,6 @@ export class FormSearchComp extends BaseComponent<
     });
   }
 
-  async getBoPhan() {
-    boPhanService.site = `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa`;
-    let boPhan = await boPhanService.getAll();
-    this.setState({
-      boPhan,
-    });
-  }
-
   async selectYear(yearSelected: number) {
     this.setState({
       loading: true,
@@ -261,6 +253,9 @@ export class FormSearchComp extends BaseComponent<
   reset() {
     this.setState({
       BoPhanThucHienId: undefined,
+    });
+    this.peoplePickerRef!.current!.setState({
+      selectedPersons: [],
     });
     this.props.form.resetFields();
     this.props.form.setFieldsValue({ TypeDoc: "LT" });
@@ -385,7 +380,8 @@ export class FormSearchComp extends BaseComponent<
                   {}
                 )(
                   <PeoplePicker
-                    key={"BoPhanThucHienId"}
+                    ref={this.peoplePickerRef}
+                    key={"id"}
                     context={this.props.context}
                     personSelectionLimit={1}
                     showtooltip={false}
@@ -396,6 +392,7 @@ export class FormSearchComp extends BaseComponent<
                         this.setState({
                           BoPhanThucHienId: parseInt(items[0].id),
                         });
+                      } else {
                       }
                     }}
                     showHiddenInUI={true}

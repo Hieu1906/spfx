@@ -11,40 +11,49 @@ import { IHomepageProps } from "./IHomepageProps";
 import { groupBy } from "lodash";
 import * as strings from "DocumentAndSiteWebPartStrings";
 export interface IHomepageStates {
-
   isModalVisible: boolean;
-  titleModal: string;
+
+  drsGroup?: {
+    Title: string;
+    Key: string;
+    BackgroundColor?: string;
+    ImgUrl?: string;
+  };
 }
 
 export default class Homepage extends React.Component<
   IHomepageProps,
   IHomepageStates
 > {
-  drsGroup : {Title:string,backgroundColor?:string,imgUrl?:string}[]=[
+  drsGroup: {
+    Title: string;
+    Key: string;
+    BackgroundColor?: string;
+    ImgUrl?: string;
+  }[] = [
     {
-      Title:"Chứng từ lưu tạm"
+      Title: "Chứng từ lưu tạm",
+      Key: "Chng%20t%20lu%20tm",
     },
     {
-      Title:"Hồ sơ mua sắm"
+      Title: "Hồ sơ mua sắm",
+      Key: "MS",
     },
     {
-      Title:"Hồ sơ thanh toán"
+      Title: "Hồ sơ thanh toán",
+      Key: "TT",
     },
     {
-      Title:"Hồ sơ tạm ứng"
+      Title: "Hồ sơ tạm ứng",
+      Key: "TU",
     },
   ];
   constructor(props: IHomepageProps) {
     super(props);
     this.state = {
-    
       isModalVisible: false,
-      titleModal: "",
     };
   }
-
-
-
 
   renderModal() {
     let arr = [];
@@ -56,7 +65,7 @@ export default class Homepage extends React.Component<
         width={700}
         className={styles.modal}
         footer={null}
-        title={this.state.titleModal}
+        title={this.state.drsGroup?.Title}
         visible={this.state.isModalVisible}
         onCancel={() => {
           this.setState({
@@ -69,7 +78,7 @@ export default class Homepage extends React.Component<
             <div
               onClick={() => {
                 window.open(
-                  `${this.props.context.pageContext.web.absoluteUrl}/${item}`
+                  `${this.props.context.pageContext.web.absoluteUrl}/${item}/${this.state.drsGroup.Key}`
                 );
               }}
               className={styles.modal__listItem__item}
@@ -81,7 +90,7 @@ export default class Homepage extends React.Component<
                 <div
                   className={styles.modal__listItem__item__wrapperText__text}
                 >
-                  {this.state.titleModal}
+                  {this.state.drsGroup?.Title}
                 </div>
                 <div
                   style={{ fontWeight: "bold" }}
@@ -97,44 +106,46 @@ export default class Homepage extends React.Component<
     );
   }
 
-  
   public render(): React.ReactElement<IHomepageProps> {
-    
     return (
       <div className={styles.homepage}>
-          <div className={styles.drContainer}>
-        <div className={styles.title}>{this.props.description?this.props.description:"CÔNG TY CỔ PHẦN CHỨNG KHOÁN SSI"} </div>
-        
+        <div className={styles.drContainer}>
+          <div className={styles.title}>
+            {this.props.description
+              ? this.props.description
+              : "CÔNG TY CỔ PHẦN CHỨNG KHOÁN SSI"}{" "}
+          </div>
+
           <Row gutter={32} className={styles.drsParentContainer}>
             {this.drsGroup.map((item) => (
-              <Col span={6}> <a
-              className={styles.drsContainer}
-              onClick={() => {
-                this.setState({
-                  isModalVisible: true,
-                  titleModal: item.Title,
-                });
-              }}
-            >
-              <Avatar
-                title={item.Title}
-                imageUrl={item?.imgUrl ? item.imgUrl : undefined}
-              />
-              <div className={styles.drsTitle}>{item.Title}</div>
-            </a></Col>
+              <Col span={6}>
+                <a
+                  className={styles.drsContainer}
+                  onClick={() => {
+                    this.setState({
+                      isModalVisible: true,
+
+                      drsGroup: item,
+                    });
+                  }}
+                >
+                  <Avatar
+                    title={item.Title}
+                    imageUrl={item?.ImgUrl ? item.ImgUrl : undefined}
+                  />
+                  <div className={styles.drsTitle}>{item.Title}</div>
+                </a>
+              </Col>
             ))}
           </Row>
-        
-      </div>
+        </div>
         {this.renderModal()}
-      
       </div>
     );
   }
 }
 const iconSite = (
   <svg
-
     width="16"
     height="17"
     viewBox="0 0 16 17"
@@ -142,7 +153,6 @@ const iconSite = (
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-    
       d="M1.19434 1.04764C1.19434 0.637318 1.52697 0.304688 1.93729 0.304688H13.8245C14.2348 0.304688 14.5675 0.637318 14.5675 1.04764V6.50535C14.5675 6.91567 14.2348 7.2483 13.8245 7.2483H1.93729C1.52697 7.2483 1.19434 6.91567 1.19434 6.50535V1.04764Z"
       fill="#3A8CE4"
     />
@@ -151,7 +161,6 @@ const iconSite = (
       stroke="white"
     />
     <path
-    
       d="M1.19434 9.24295C1.19434 8.83263 1.52697 8.5 1.93729 8.5H13.8245C14.2348 8.5 14.5675 8.83263 14.5675 9.24295V14.7007C14.5675 15.111 14.2348 15.4436 13.8245 15.4436H1.93729C1.52697 15.4436 1.19434 15.111 1.19434 14.7007V9.24295Z"
       fill="#3A8CE4"
     />

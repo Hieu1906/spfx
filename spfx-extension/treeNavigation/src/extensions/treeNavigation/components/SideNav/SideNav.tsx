@@ -298,12 +298,12 @@ export default class SideNav extends BaseComponent<
     console.log(urlSplitted);
     if (valueSearch.length > 0) {
       window.open(
-        `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/adms/SitePages/Search.aspx?key=${this.state.valueSearch}&year=${urlSplitted[8]}`,
+        `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/adms/SitePages/Search.aspx?keyword=${this.state.valueSearch}&year=${urlSplitted[8]}`,
         "_self"
       );
     } else {
       window.open(
-        `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/adms/SitePages/Search.aspx?year=${urlSplitted[8]}`,
+        `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/adms/SitePages/Search.aspx?keyword=${urlSplitted[8]}`,
         "_self"
       );
     }

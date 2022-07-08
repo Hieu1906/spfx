@@ -16,6 +16,7 @@ import { flatten, trim } from "lodash";
 import * as moment from "moment";
 import { emptyIcon } from "./svgIcon";
 import Patiantion from "./Patination";
+import { Global } from "../../../common/functions/globalConstants";
 interface ResultFile {
   BoPhanThucHienId: number;
   BoPhanThucHienStringId: string;
@@ -66,11 +67,28 @@ export default class SearchDocuments extends BaseComponent<
     };
     this.onMount(async () => {
       this.getWidthViewTable();
-      await this.handelSearch({
-        TypeDoc: "LT",
-        Year: moment().year(),
-      });
+      await this.initSearch();
     });
+  }
+
+  async initSearch() {
+    let keyword = Global.Functions.getParameterByName("keyword");
+    let year = Global.Functions.getParameterByName("year");
+    await this.handelSearch({
+      TypeDoc: "LT",
+      Year: year ? parseInt(year) : moment().year(),
+      KeyWord: keyword ? keyword : undefined,
+    });
+    if (keyword) {
+      this.formSearchRef.current.props.form.setFieldsValue({
+        KeyWord: keyword,
+      });
+    }
+    if (year) {
+      this.formSearchRef.current.props.form.setFieldsValue({
+        Year: year,
+      });
+    }
   }
 
   getWidthViewTable() {

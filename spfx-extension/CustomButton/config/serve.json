@@ -4,7 +4,7 @@
   "https": true,
   "serveConfigurations": {
     "default": {
-      "pageUrl": "https://contoso.sharepoint.com/sites/mySite/SitePages/myPage.aspx",
+      "pageUrl": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/adms/2022/Chng%20t%20lu%20tm/Forms/AllItems.aspx",
       "customActions": {
         "71b00e79-02fe-4c97-bb43-abfc827f0638": {
           "location": "ClientSideExtension.ListViewCommandSet.CommandBar",

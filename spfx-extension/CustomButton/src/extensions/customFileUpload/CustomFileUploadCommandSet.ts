@@ -10,6 +10,7 @@ import { Dialog } from "@microsoft/sp-dialog";
 import * as ReactDom from "react-dom";
 import ModalUploadFile, { ICustomPanelProps } from "./components/ModalUpload";
 import * as React from "react";
+import { sp } from "@pnp/sp";
 
 /**
  * If your command set uses the ClientSideComponentProperties JSON input,
@@ -28,6 +29,9 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
   private panelDomElement: HTMLDivElement;
   @override
   public onInit(): Promise<void> {
+    sp.setup({
+      spfxContext: this.context,
+    });
     Log.info(LOG_SOURCE, "Initialized CustomFileUploadCommandSet");
     this.panelDomElement = document.body.appendChild(
       document.createElement("div")
@@ -79,7 +83,7 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
       currentTitle,
       itemId,
       listId: this.context.pageContext.list.id.toString(),
-      onClose: () => {
+      onClose: async () => {
         this._dismissPanel();
       },
     });
@@ -100,6 +104,8 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
         itemId: props.itemId,
         isOpen: props.isOpen,
         listId: props.props,
+        context: this.context,
+        raiseOnChange: this.raiseOnChange,
       }
     );
     ReactDom.render(element, this.panelDomElement);
