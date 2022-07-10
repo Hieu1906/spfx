@@ -41,7 +41,11 @@ interface ResultFile {
   DuAn: { TenDuAn: string; ID: number };
   ChiNhanh: { TenChiNhanh: string; ID: number };
   LoaiChungTuKeToan: { TenLoaiChungTuKeToan: string; ID: number };
+  LoaiChungTu: { TenLoaiChungTu: string; ID: number };
   BoPhanThucHien: { Title: string; ID: number };
+  NhaCungCap: { TenNCC: string; ID: number };
+  MaChungKhoan: { MaChungKhoan: string; ID: number };
+  TaiKhoanNganHang: { SoTaiKhoan: string; ID: number };
   RequestCode: string;
   File: { Name: string };
 }
@@ -392,10 +396,12 @@ export default class SearchDocuments extends BaseComponent<
         dataIndex: "SoChungTuKeToan",
         key: "SoChungTuKeToan",
         width: 200,
-
-        render: (text: string, record: ResultFile, index) => (
-          <p>{record.SoChungTuKeToan}</p>
-        ),
+        render: (text: string, record: ResultFile, index) =>
+          record.SoChungTu && (
+            <Tag color={"#dc0d15"} key={index}>
+              {record.SoChungTuKeToan}
+            </Tag>
+          ),
       },
       {
         title: "Ngày chứng từ kế toán",
@@ -444,6 +450,26 @@ export default class SearchDocuments extends BaseComponent<
         ),
       },
       {
+        title: "Nhà cung cấp",
+        dataIndex: "NhaCungCap",
+        key: "NhaCungCapId",
+        width: 200,
+
+        render: (text: string, record: ResultFile, index) => (
+          <p>{record.NhaCungCap?.TenNCC}</p>
+        ),
+      },
+      {
+        title: "Loại chứng từ",
+        dataIndex: "LoaiChungTu",
+        key: "LoaiChungTuId",
+        width: 200,
+
+        render: (text: string, record: ResultFile, index) => (
+          <p>{record?.LoaiChungTu?.TenLoaiChungTu}</p>
+        ),
+      },
+      {
         title: "Loại chứng từ KT",
         dataIndex: "LoaiChungTuKeToan",
         key: "LoaiChungTuKeToan",
@@ -451,6 +477,24 @@ export default class SearchDocuments extends BaseComponent<
 
         render: (text: string, record: ResultFile, index) => (
           <p>{record?.LoaiChungTuKeToan?.TenLoaiChungTuKeToan}</p>
+        ),
+      },
+      {
+        title: "Mã chứng khoán",
+        dataIndex: "MaChungKhoan",
+        key: "MaChungKhoan",
+        width: 200,
+        render: (text: string, record: ResultFile, index) => (
+          <p>{record?.MaChungKhoan?.MaChungKhoan}</p>
+        ),
+      },
+      {
+        title: "TK ngân hàng",
+        dataIndex: "TaiKhoanNganHang",
+        key: "TaiKhoanNganHang",
+        width: 200,
+        render: (text: string, record: ResultFile, index) => (
+          <p>{record?.TaiKhoanNganHang?.SoTaiKhoan}</p>
         ),
       },
     ];

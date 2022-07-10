@@ -1,4 +1,3 @@
-
 import { sp } from "@pnp/sp";
 import "@pnp/sp/webs";
 import "@pnp/sp/lists";
@@ -8,6 +7,7 @@ import * as _ from "lodash";
 
 export interface QueryOption {
   orderBy?: string;
+  filter?: string;
 }
 export abstract class BaseService<T> {
   listName: string;
@@ -21,6 +21,10 @@ export abstract class BaseService<T> {
     if (_.get(queryOption, "orderBy", "") !== "") {
       f.orderBy(queryOption.orderBy, true);
     }
+    if (_.get(queryOption, "filter", "") !== "") {
+      f.filter(queryOption.filter);
+    }
+
     return (await f.get()) as T[];
   }
 }

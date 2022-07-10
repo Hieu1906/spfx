@@ -26,6 +26,37 @@
       }
     }
   }
+  &__fileRender {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 3px 10px;
+    border-radius: 4px;
+    border: 1px solid rgb(217, 217, 217);
+    margin-bottom: 5px;
+    &:hover {
+      background-color: "[theme: themeLight, default: #aad2f3]" !important;
+    }
+  }
+  &__fileonlyView {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 25px;
+    height: 40px;
+    width: 100%;
+    background-color: #edebe9;
+    color: #1a73e8;
+    border-radius: 5px;
+    &:hover {
+      background-color: "[theme: themeLight, default: #aad2f3]" !important;
+    }
+    &__icon {
+      width: fit-content;
+      width: fit-content;
+      margin-right: 5px;
+    }
+  }
 }
 :global {
   .ms-BasePicker-text {
@@ -59,31 +90,11 @@
     color: #262626 !important;
   }
   .folderPicker_b8d99804 {
-    border: 1px solid #d9d9d9!important;
+    border: 1px solid #d9d9d9 !important;
     line-height: 30px;
     padding: 10px;
     height: 34px;
     background: white;
-  }
-}
-.colTable {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  &__icon {
-    width: fit-content;
-    width: fit-content;
-  }
-  &__text {
-    margin-left: 15px;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 20px;
-    display: flex;
-    align-items: center;
-    letter-spacing: -0.015em;
-    margin-bottom: 0px !important;
-    color: #262626;
-    width: fit-content;
+    
   }
 }

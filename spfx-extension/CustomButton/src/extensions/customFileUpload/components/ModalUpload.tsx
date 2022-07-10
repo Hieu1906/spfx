@@ -11,28 +11,8 @@ import { MaChungKhoan } from "../../common/models/MaChungKhoan";
 import { NhaCungCap } from "../../common/models/NhaCungCap";
 import { NhomChungTu } from "../../common/models/NhomChungTu";
 import { TaiKhoanNganHang } from "../../common/models/TaiKhoanNganHang";
+import { ICustomPanelProps, ICustomPanelState } from "../interface";
 import { FormUpload, FormUploadComp } from "./FormUpload";
-export interface ICustomPanelState {
-  chinhanh: ChiNhanh[];
-  duAn: DuAn[];
-  boPhan: BoPhan[];
-  nhaCungCap: NhaCungCap[];
-  nhomChungTu: NhomChungTu[];
-  loaiChungTuKeToan: LoaiChungTuKeToan[];
-  loaiChungTu: LoaiChungTu[];
-  maCK: MaChungKhoan[];
-  tKNH: TaiKhoanNganHang[];
-}
-
-export interface ICustomPanelProps {
-  onClose: () => Promise<void>;
-  raiseOnChange: () => void;
-  isOpen: boolean;
-  currentTitle: string;
-  itemId: number;
-  listId: string;
-  context: ListViewCommandSetContext;
-}
 
 export default class ModalUploadFile extends BaseComponent<
   ICustomPanelProps,
@@ -53,17 +33,20 @@ export default class ModalUploadFile extends BaseComponent<
       maCK: [],
       tKNH: [],
     };
-    this.onMount(async () => {
-
-    });
+    this.onMount(async () => {});
   }
 
   public render(): React.ReactElement<ICustomPanelProps> {
-    let { isOpen, currentTitle } = this.props;
+    let { isOpen } = this.props;
+
     return (
       <Modal
-      destroyOnClose={true}
-        title={"Thêm mới chứng từ lưu tạm"}
+        destroyOnClose={true}
+        title={
+          this.props.formValues
+            ? "Chỉnh sửa chứng từ lưu tạm"
+            : "Thêm mới chứng từ lưu tạm"
+        }
         width={900}
         onCancel={async () => {
           await this.props.onClose();
@@ -72,6 +55,7 @@ export default class ModalUploadFile extends BaseComponent<
         footer={null}
       >
         <FormUpload
+          formValues={this.props.formValues ? this.props.formValues : undefined}
           raiseOnChange={() => {
             this.props.raiseOnChange();
           }}

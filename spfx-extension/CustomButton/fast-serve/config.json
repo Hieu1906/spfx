@@ -4,7 +4,7 @@
     "isLibraryComponent": false
   },
   "serve": {
-    "openUrl": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/adms/2022/Chng%20t%20lu%20tm/Forms/AllItems.aspx?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js",
+    "openUrl": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/adms/2023/Chng%20t%20lu%20tm/Forms/AllItems.aspx?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js",
     "fullScreenErrors": true
   }
 }

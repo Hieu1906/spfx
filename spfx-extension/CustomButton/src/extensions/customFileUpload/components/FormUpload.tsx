@@ -1,10 +1,11 @@
-import { ListViewCommandSetContext } from "@microsoft/sp-listview-extensibility";
-import { IFolder } from "@pnp/spfx-controls-react/lib/FolderExplorer";
 import { sp } from "@pnp/sp";
-import "@pnp/sp/webs";
 import "@pnp/sp/files";
-import "@pnp/sp/lists";
+import { IFileAddResult } from "@pnp/sp/files";
 import "@pnp/sp/folders";
+import "@pnp/sp/lists";
+import "@pnp/sp/site-groups";
+import "@pnp/sp/webs";
+import { FolderPicker } from "@pnp/spfx-controls-react";
 import {
   PeoplePicker,
   PrincipalType,
@@ -17,24 +18,16 @@ import {
   Icon,
   Input,
   message,
+  Modal,
   Row,
   Select,
   Spin,
   Upload,
 } from "antd";
-import { FormComponentProps } from "antd/lib/form/Form";
+import { cloneDeep, filter } from "lodash";
 import * as moment from "moment";
 import * as React from "react";
 import { BaseComponent } from "../../common/components/BaseComponent";
-import { BoPhan } from "../../common/models/BoPhan";
-import { ChiNhanh } from "../../common/models/ChiNhanh";
-import { DuAn } from "../../common/models/DuAn";
-import { LoaiChungTu } from "../../common/models/LoaiChungTu";
-import { LoaiChungTuKeToan } from "../../common/models/LoaiChungTuKeToan";
-import { MaChungKhoan } from "../../common/models/MaChungKhoan";
-import { NhaCungCap } from "../../common/models/NhaCungCap";
-import { NhomChungTu } from "../../common/models/NhomChungTu";
-import { TaiKhoanNganHang } from "../../common/models/TaiKhoanNganHang";
 import { chiNhanhService } from "../../common/services/chiNhanhService";
 import { duAnService } from "../../common/services/duAnService";
 import { loaiCTKTService } from "../../common/services/loaiChungTuKeToanService";
@@ -43,32 +36,9 @@ import { maCKService } from "../../common/services/maChungKhoanService";
 import { nhaCungCapService } from "../../common/services/nhaCungCapService";
 import { nhomCTService } from "../../common/services/nhomChungTuService";
 import { tKNHService } from "../../common/services/taiKhoanNganHangService";
+import { FileCheck, FormUploadProps, FormUploadState } from "../interface";
 import styles from "./FormUpload.module.scss";
-import { FolderPicker } from "@pnp/spfx-controls-react";
-import { cloneDeep } from "lodash";
-import { IFileAddResult } from "@pnp/sp/files";
 
-interface FormUploadProps extends FormComponentProps {
-  context: ListViewCommandSetContext;
-  search: (value: any) => Promise<void>;
-  onclose: () => Promise<void>;
-  raiseOnChange: () => void;
-}
-interface FormUploadState {
-  yearSelected: number;
-  chinhanh: ChiNhanh[];
-  duAn: DuAn[];
-  boPhan: BoPhan[];
-  nhaCungCap: NhaCungCap[];
-  nhomChungTu: NhomChungTu[];
-  loaiChungTuKeToan: LoaiChungTuKeToan[];
-  loaiChungTu: LoaiChungTu[];
-  maCK: MaChungKhoan[];
-  tKNH: TaiKhoanNganHang[];
-  loading: boolean;
-  BoPhanThucHienId?: number;
-  selectedFolder: IFolder;
-}
 const formItemLayout = {
   labelCol: {
     xs: { span: 24 },
@@ -84,20 +54,6 @@ const years: number[] = [];
 for (let i = 2020; i <= 2030; i++) {
   years.push(i);
 }
-const fieldCanReset = [
-  "ChiNhanhId",
-  "DuAnId",
-  "LoaiChungTuId",
-  "LoaiChungTuKeToanId",
-  "MaChungKhoanId",
-  "NgayChungTuFrom",
-  "NgayChungTuKTFrom",
-  "NgayChungTuKTTo",
-  "NgayChungTuTo",
-  "NhaCungCapId",
-  "NhomChungTuId",
-  "TaiKhoanNganHangId",
-];
 
 export class FormUploadComp extends BaseComponent<
   FormUploadProps,
@@ -130,16 +86,62 @@ export class FormUploadComp extends BaseComponent<
         loading: true,
       });
       await this.loadMetaData();
-
+      let { formValues } = this.props;
+      if (formValues) {
+        this.props.form.setFieldsValue(formValues);
+        if (formValues.BoPhanThucHien?.length > 0) {
+          let group = await sp.web.siteGroups.getById(
+            parseInt(formValues.BoPhanThucHien[0]?.id)
+          )();
+          this.peoplePickerRef.current.setState({
+            selectedPersons: [
+              {
+                id: group.Id,
+                loginName: group.LoginName,
+                secondaryText: group.Title,
+                text: group.Title,
+              } as any,
+            ],
+          });
+        }
+      }
       this.setState({
         loading: false,
       });
     });
   }
 
-  async saveFile() {
+  renderFile(filesExist: FileCheck[]) {
+    return filesExist.map((item) => (
+      <div className={styles.searchDocuments__fileRender}>
+        <Icon type="file-add" style={{ marginRight: 5 }} /> {item.fileName}
+      </div>
+    ));
+  }
+
+  showWarning(
+    filesExist: FileCheck[],
+    formvalues: any,
+    serverRelativeUrl: string
+  ) {
+    Modal.confirm({
+      title:
+        "Một số tài liệu tải lên đã tồn tại hoặc bị trùng tên,bạn có muốn thay thế chúng ?",
+      content: this.renderFile(filesExist),
+      onOk: async () => {
+        await this.saveFile(formvalues, serverRelativeUrl);
+      },
+      cancelText: "Hủy bỏ",
+      okText: "Đồng ý",
+      onCancel() {
+        console.log("Cancel");
+      },
+    });
+  }
+
+  async updateFile() {
     this.props.form.validateFields(async (err, formvalues) => {
-      console.log(formvalues);
+      let { formValues } = this.props;
       if (!err) {
         try {
           this.setState({
@@ -148,36 +150,19 @@ export class FormUploadComp extends BaseComponent<
           if (this.state.BoPhanThucHienId) {
             formvalues.BoPhanThucHienId = this.state.BoPhanThucHienId;
           }
-          let serverRelativeUrl = this.state.selectedFolder
-            ? this.state.selectedFolder.ServerRelativeUrl
-            : "Chng t lu tm";
-          let result: IFileAddResult[] = await Promise.all(
-            formvalues.FileUpload?.fileList.map((file) => {
-              return sp.web
-                .getFolderByServerRelativePath(serverRelativeUrl)
-                .files.add(file.name, file.originFileObj, false);
-            })
+          await this.updateMedadataToFile(
+            formValues.FileRef,
+            formvalues,
+            formValues.FileLeafRef
           );
-
-          await Promise.all(
-            result.map(async (item) => {
-              await this.addMedadataToFile(
-                item?.data.ServerRelativeUrl,
-                formvalues,
-                item.data.Name
-              );
-            })
-          );
-
-          message.success("Thêm mới chúng từ thành công", 3);
           this.props.raiseOnChange();
           await this.props.onclose();
           window.location.reload();
-        } catch (e) {
-          message.error("Đã có lỗi xảy ra trong quá trình tải tài liệu", 5);
-          this.setState({
-            loading: false,
-          });
+        } catch (error) {
+          message.error(
+            "Đã có lỗi xảy ra trong quá trình cập nhật tài liệu",
+            5
+          );
         } finally {
           this.setState({
             loading: false,
@@ -185,6 +170,96 @@ export class FormUploadComp extends BaseComponent<
         }
       }
     });
+  }
+
+  async checkVadlidFile() {
+    this.props.form.validateFields(async (err, formvalues) => {
+      console.log(formvalues);
+      if (!err) {
+        try {
+          this.setState({
+            loading: true,
+          });
+          let serverRelativeUrl = this.state.selectedFolder
+            ? this.state.selectedFolder.ServerRelativeUrl
+            : "Chng t lu tm";
+          let fileCheck: FileCheck[] = await Promise.all(
+            formvalues.FileUpload?.fileList.map(async (file: File) => {
+              const exists = await sp.web
+                .getFolderByServerRelativePath(serverRelativeUrl)
+                .files.getByName(file.name)
+                .exists();
+              return {
+                exists: exists,
+                fileName: file.name,
+              };
+            })
+          );
+          this.setState({
+            loading: false,
+          });
+          let fileEXists: FileCheck[] = filter(fileCheck, { exists: true });
+
+          if (fileEXists?.length > 0) {
+            this.showWarning(fileEXists, formvalues, serverRelativeUrl);
+          } else {
+            await this.saveFile(formvalues, serverRelativeUrl);
+          }
+        } catch (error) {
+          message.error(
+            "Đã có lỗi xảy ra trong quá trình kiểm tra trước khi tải tài liệu",
+            5
+          );
+          this.setState({
+            loading: false,
+          });
+        }
+      }
+    });
+  }
+
+  async saveFile(formvalues, serverRelativeUrl: string) {
+    try {
+      this.setState({
+        loading: true,
+      });
+
+      if (this.state.BoPhanThucHienId) {
+        formvalues.BoPhanThucHienId = this.state.BoPhanThucHienId;
+      }
+
+      let result: IFileAddResult[] = await Promise.all(
+        formvalues.FileUpload?.fileList.map((file) => {
+          return sp.web
+            .getFolderByServerRelativePath(serverRelativeUrl)
+            .files.add(file.name, file.originFileObj, true);
+        })
+      );
+
+      await Promise.all(
+        result.map(async (item) => {
+          await this.updateMedadataToFile(
+            item?.data.ServerRelativeUrl,
+            formvalues,
+            item.data.Name
+          );
+        })
+      );
+
+      message.success("Thêm mới chúng từ thành công", 3);
+      this.props.raiseOnChange();
+      await this.props.onclose();
+      window.location.reload();
+    } catch (e) {
+      message.error("Đã có lỗi xảy ra trong quá trình tải tài liệu", 5);
+      this.setState({
+        loading: false,
+      });
+    } finally {
+      this.setState({
+        loading: false,
+      });
+    }
   }
 
   getExtension(path: string) {
@@ -199,7 +274,7 @@ export class FormUploadComp extends BaseComponent<
     return basename.slice(pos + 1); // extract extension ignoring `.`
   }
 
-  async addMedadataToFile(
+  async updateMedadataToFile(
     ServerRelativeUrl: string,
     formvalues: any,
     nameFile: string
@@ -244,14 +319,18 @@ export class FormUploadComp extends BaseComponent<
   }
 
   async getChiNhanh() {
-    let chinhanh = await chiNhanhService.getAll();
+    let chinhanh = await chiNhanhService.getAll({
+      filter: "TrangThai ne 0",
+    });
     this.setState({
       chinhanh,
     });
   }
 
   async getDuAn() {
-    let duAn = await duAnService.getAll();
+    let duAn = await duAnService.getAll({
+      filter: "TrangThai ne 0",
+    });
 
     this.setState({
       duAn,
@@ -259,7 +338,9 @@ export class FormUploadComp extends BaseComponent<
   }
 
   async getNhaCungCap() {
-    let nhaCungCap = await nhaCungCapService.getAll();
+    let nhaCungCap = await nhaCungCapService.getAll({
+      filter: "TrangThai ne 0",
+    });
 
     this.setState({
       nhaCungCap,
@@ -267,35 +348,45 @@ export class FormUploadComp extends BaseComponent<
   }
 
   async getNhomChungTu() {
-    let nhomChungTu = await nhomCTService.getAll();
+    let nhomChungTu = await nhomCTService.getAll({
+      filter: "TrangThai ne 0",
+    });
     this.setState({
       nhomChungTu,
     });
   }
 
   async getLoaiChungTuKeToan() {
-    let loaiChungTuKeToan = await loaiCTKTService.getAll();
+    let loaiChungTuKeToan = await loaiCTKTService.getAll({
+      filter: "TrangThai ne 0",
+    });
     this.setState({
       loaiChungTuKeToan,
     });
   }
 
   async getLoaiChungTu() {
-    let loaiChungTu = await loaiCTService.getAll();
+    let loaiChungTu = await loaiCTService.getAll({
+      filter: "TrangThai ne 0",
+    });
     this.setState({
       loaiChungTu,
     });
   }
 
   async getMaCK() {
-    let maCK = await maCKService.getAll();
+    let maCK = await maCKService.getAll({
+      filter: "TrangThai ne 0",
+    });
     this.setState({
       maCK,
     });
   }
 
   async getTKNH() {
-    let tKNH = await tKNHService.getAll();
+    let tKNH = await tKNHService.getAll({
+      filter: "TrangThai ne 0",
+    });
     this.setState({
       tKNH,
     });
@@ -311,15 +402,63 @@ export class FormUploadComp extends BaseComponent<
     this.props.form.resetFields();
     this.props.form.setFieldsValue({ TypeDoc: "LT" });
     this.props.form.setFieldsValue({ Year: moment().year() });
-    this.saveFile();
+  }
+
+  getIcon(fileName: string) {
+    let extensionFile = fileName ? this.getExtension(fileName) : undefined;
+
+    let icon: string = "";
+
+    if (extensionFile) {
+      if (["csv", "xlsx"].includes(extensionFile)) {
+        icon = require("./img/iconExcel.png");
+      }
+      if (["doc", "docx"].includes(extensionFile)) {
+        icon = require("./img/iconWord.png");
+      }
+      if (["pdf"].includes(extensionFile)) {
+        icon = require("./img/iconPdf.png");
+      }
+    }
+
+    return icon;
   }
 
   public render(): React.ReactElement<FormUploadProps> {
     const { getFieldDecorator } = this.props.form;
+    const { formValues } = this.props;
 
     return (
       <Spin spinning={this.state.loading}>
         <div className={styles.searchDocuments__searchForm}>
+          {formValues&&(
+            <div
+            className={styles.searchDocuments__fileonlyView}
+            onClick={() => {
+              window.open(
+                `${
+                  this.props.context.pageContext.web.absoluteUrl
+                }/_layouts/15/wopiframe.aspx?sourcedoc=${
+                  formValues.UniqueId
+                }&action=${"view"}`,
+                "_blank"
+              );
+            }}
+          >
+            {this.getIcon(formValues?.Title) ? (
+              <img
+                className={styles.searchDocuments__fileonlyView__icon}
+                src={this.getIcon(formValues?.Title)}
+              />
+            ) : (
+              <Icon
+                className={styles.searchDocuments__fileonlyView__icon}
+                type="file"
+              />
+            )}
+            {formValues?.Title}
+          </div>
+          )}
           <Form
             labelAlign={"left"}
             {...formItemLayout}
@@ -330,61 +469,63 @@ export class FormUploadComp extends BaseComponent<
                 styles.searchDocuments__searchForm__form__wrapperByGroup
               }
             >
-              <Row>
-                <Col span={12}>
-                  <Form.Item
-                    wrapperCol={{ span: 16 }}
-                    labelCol={{ span: 8 }}
-                    label="Tài liệu"
-                  >
-                    {getFieldDecorator("FileUpload", {
-                      rules: [
-                        {
-                          required: true,
-                          message: "Trường bắt buộc",
-                        },
-                      ],
-                    })(
-                      <Upload multiple={true} style={{ width: "100%" }}>
-                        <Button>
-                          <Icon type="upload" /> Tải chứng từ lưu tạm
-                        </Button>
-                      </Upload>
-                    )}
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item
-                    wrapperCol={{ span: 16 }}
-                    labelCol={{ span: 8 }}
-                    label="Đường dẫn"
-                  >
-                    {getFieldDecorator(
-                      "Path",
-                      {}
-                    )(
-                      <FolderPicker
-                        key={"id"}
-                        context={this.props.context}
-                        label=""
-                        required={false}
-                        rootFolder={{
-                          Name: "Chứng từ lưu tạm",
-                          ServerRelativeUrl: `Chng t lu tm`,
-                        }}
-                        defaultFolder={this.state.selectedFolder}
-                        onSelect={(folder) => {
-                          this.setState({
-                            selectedFolder: folder,
-                          });
-                        }}
-                        ref={this.folderPickerRef}
-                        canCreateFolders={true}
-                      />
-                    )}
-                  </Form.Item>
-                </Col>
-              </Row>
+              {!formValues && (
+                <Row>
+                  <Col span={12}>
+                    <Form.Item
+                      wrapperCol={{ span: 16 }}
+                      labelCol={{ span: 8 }}
+                      label="Tài liệu"
+                    >
+                      {getFieldDecorator("FileUpload", {
+                        rules: [
+                          {
+                            required: true,
+                            message: "Trường bắt buộc",
+                          },
+                        ],
+                      })(
+                        <Upload multiple={true} style={{ width: "100%" }}>
+                          <Button>
+                            <Icon type="upload" /> Tải chứng từ lưu tạm
+                          </Button>
+                        </Upload>
+                      )}
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      wrapperCol={{ span: 16 }}
+                      labelCol={{ span: 8 }}
+                      label="Đường dẫn"
+                    >
+                      {getFieldDecorator(
+                        "Path",
+                        {}
+                      )(
+                        <FolderPicker
+                          key={"id"}
+                          context={this.props.context}
+                          label=""
+                          required={false}
+                          rootFolder={{
+                            Name: "Chứng từ lưu tạm",
+                            ServerRelativeUrl: `Chng t lu tm`,
+                          }}
+                          defaultFolder={this.state.selectedFolder}
+                          onSelect={(folder) => {
+                            this.setState({
+                              selectedFolder: folder,
+                            });
+                          }}
+                          ref={this.folderPickerRef}
+                          canCreateFolders={true}
+                        />
+                      )}
+                    </Form.Item>
+                  </Col>
+                </Row>
+              )}
 
               <Row>
                 <Col span={12}>
@@ -461,7 +602,7 @@ export class FormUploadComp extends BaseComponent<
                           disabled={false}
                           onChange={(items: any[]) => {
                             if (items?.length > 0) {
-                              console.log(items);
+                            
                               this.setState({
                                 BoPhanThucHienId: parseInt(items[0].id),
                               });
@@ -710,11 +851,15 @@ export class FormUploadComp extends BaseComponent<
                   <Button
                     type={"primary"}
                     onClick={async () => {
-                      await this.saveFile();
+                      if (formValues) {
+                        await this.updateFile();
+                      } else {
+                        await this.checkVadlidFile();
+                      }
                     }}
                     style={{ marginRight: 16 }}
                   >
-                    Thêm mới
+                    {formValues ? "Cập nhật" : "Thêm mới"}
                   </Button>
                   <Button
                     onClick={() => {

@@ -1,7 +1,7 @@
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import {
   PeoplePicker,
-  PrincipalType
+  PrincipalType,
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { Button, DatePicker, Form, Input, message, Select, Spin } from "antd";
 import { FormComponentProps } from "antd/lib/form/Form";
@@ -25,9 +25,7 @@ import { loaiCTService } from "../../common/services/loaiChungTuService";
 import { maCKService } from "../../common/services/maChungKhoanService";
 import { nhaCungCapService } from "../../common/services/nhaCungCapService";
 import { nhomCTService } from "../../common/services/nhomChungTuService";
-import {
-  tKNHService
-} from "../../common/services/taiKhoanNganHangService";
+import { tKNHService } from "../../common/services/taiKhoanNganHangService";
 import styles from "./SearchDocuments.module.scss";
 
 interface FormSearchProps extends FormComponentProps {
@@ -154,7 +152,9 @@ export class FormSearchComp extends BaseComponent<
     chiNhanhService.site = subsite
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
-    let chinhanh = await chiNhanhService.getAll();
+    let chinhanh = await chiNhanhService.getAll({
+      filter: "TrangThai ne 0",
+    });
     this.setState({
       chinhanh,
     });
@@ -164,7 +164,9 @@ export class FormSearchComp extends BaseComponent<
     duAnService.site = subsite
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
-    let duAn = await duAnService.getAll();
+    let duAn = await duAnService.getAll({
+      filter: "TrangThai ne 0",
+    });
 
     this.setState({
       duAn,
@@ -175,7 +177,9 @@ export class FormSearchComp extends BaseComponent<
     nhaCungCapService.site = subsite
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
-    let nhaCungCap = await nhaCungCapService.getAll();
+    let nhaCungCap = await nhaCungCapService.getAll({
+      filter: "TrangThai ne 0",
+    })
 
     this.setState({
       nhaCungCap,
@@ -186,7 +190,9 @@ export class FormSearchComp extends BaseComponent<
     nhomCTService.site = subsite
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
-    let nhomChungTu = await nhomCTService.getAll();
+    let nhomChungTu = await nhomCTService.getAll({
+      filter: "TrangThai ne 0",
+    });
 
     this.setState({
       nhomChungTu,
@@ -197,7 +203,9 @@ export class FormSearchComp extends BaseComponent<
     loaiCTKTService.site = subsite
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
-    let loaiChungTuKeToan = await loaiCTKTService.getAll();
+    let loaiChungTuKeToan = await loaiCTKTService.getAll({
+      filter: "TrangThai ne 0",
+    });
 
     this.setState({
       loaiChungTuKeToan,
@@ -208,7 +216,9 @@ export class FormSearchComp extends BaseComponent<
     loaiCTService.site = subsite
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
-    let loaiChungTu = await loaiCTService.getAll();
+    let loaiChungTu = await loaiCTService.getAll({
+      filter: "TrangThai ne 0",
+    });
     this.setState({
       loaiChungTu,
     });
@@ -218,7 +228,9 @@ export class FormSearchComp extends BaseComponent<
     maCKService.site = subsite
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
-    let maCK = await maCKService.getAll();
+    let maCK = await maCKService.getAll({
+      filter: "TrangThai ne 0",
+    });
     this.setState({
       maCK,
     });
@@ -228,7 +240,9 @@ export class FormSearchComp extends BaseComponent<
     tKNHService.site = subsite
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
-    let tKNH = await tKNHService.getAll();
+    let tKNH = await tKNHService.getAll({
+      filter: "TrangThai ne 0",
+    });
     this.setState({
       tKNH,
     });
