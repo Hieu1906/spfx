@@ -25,6 +25,7 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
   private panelDomElement: HTMLDivElement;
   @override
   public onInit(): Promise<void> {
+    console.log("init extension")
     sp.setup({
       spfxContext: this.context,
     });

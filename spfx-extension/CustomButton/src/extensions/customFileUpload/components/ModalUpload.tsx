@@ -1,16 +1,6 @@
-import { ListViewCommandSetContext } from "@microsoft/sp-listview-extensibility";
 import { Modal } from "antd";
 import * as React from "react";
 import { BaseComponent } from "../../common/components/BaseComponent";
-import { BoPhan } from "../../common/models/BoPhan";
-import { ChiNhanh } from "../../common/models/ChiNhanh";
-import { DuAn } from "../../common/models/DuAn";
-import { LoaiChungTu } from "../../common/models/LoaiChungTu";
-import { LoaiChungTuKeToan } from "../../common/models/LoaiChungTuKeToan";
-import { MaChungKhoan } from "../../common/models/MaChungKhoan";
-import { NhaCungCap } from "../../common/models/NhaCungCap";
-import { NhomChungTu } from "../../common/models/NhomChungTu";
-import { TaiKhoanNganHang } from "../../common/models/TaiKhoanNganHang";
 import { ICustomPanelProps, ICustomPanelState } from "../interface";
 import { FormUpload, FormUploadComp } from "./FormUpload";
 
