@@ -406,8 +406,7 @@ export class FormSearchComp extends BaseComponent<
                         this.setState({
                           BoPhanThucHienId: parseInt(items[0].id),
                         });
-                      } else {
-                      }
+                      } 
                     }}
                     showHiddenInUI={true}
                     principalTypes={[PrincipalType.SharePointGroup]}

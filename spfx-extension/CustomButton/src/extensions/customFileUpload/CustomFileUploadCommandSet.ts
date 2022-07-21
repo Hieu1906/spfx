@@ -11,6 +11,11 @@ import * as ReactDom from "react-dom";
 import ModalUploadFile from "./components/ModalUpload";
 import * as React from "react";
 import { sp } from "@pnp/sp";
+import "@pnp/sp/webs";
+import "@pnp/sp/folders";
+import "@pnp/sp/security/list";
+import "@pnp/sp/site-users/web";
+import { PermissionKind } from "@pnp/sp/security";
 import {
   FormValue,
   ICustomFileUploadCommandSetProperties,
@@ -23,33 +28,46 @@ const LOG_SOURCE: string = "CustomFileUploadCommandSet";
 
 export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<ICustomFileUploadCommandSetProperties> {
   private panelDomElement: HTMLDivElement;
+  private canViewButton: boolean = false;
   @override
-  public onInit(): Promise<void> {
-    console.log("init extension")
+  public async onInit() {
     sp.setup({
       spfxContext: this.context,
     });
+    this.canViewButton = await this.checkShowButton();
+
     Log.info(LOG_SOURCE, "Initialized CustomFileUploadCommandSet");
     this.panelDomElement = document.body.appendChild(
       document.createElement("div")
     );
+  }
 
-    return Promise.resolve();
+  async checkShowButton() {
+    let doclib = sp.web.lists.getByTitle("Chứng từ lưu tạm");
+
+    const canViewButton = await doclib.currentUserHasPermissions(
+      PermissionKind.AddListItems
+    );
+    if (!canViewButton) {
+      console.log("Do not show custom buttons");
+    }
+    return canViewButton;
   }
 
   @override
-  public onListViewUpdated(
+  public async onListViewUpdated(
     event: IListViewCommandSetListViewUpdatedParameters
-  ): void {
+  ) {
     const compareOneCommand: Command = this.tryGetCommand("COMMAND_1");
     const uploadFile: Command = this.tryGetCommand("COMMAND_2");
     if (compareOneCommand) {
       // This command should be hidden unless exactly one row is selected.
-      compareOneCommand.visible = event.selectedRows.length === 1;
+      compareOneCommand.visible =
+        event.selectedRows.length === 1 && this.canViewButton;
     }
     if (uploadFile) {
       // This command should be hidden unless exactly one row is selected.
-      uploadFile.visible = this.checkVisible();
+      uploadFile.visible = this.checkVisible() && this.canViewButton;
     }
   }
 
@@ -62,7 +80,6 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
   _getformValuesFromFile(event: IListViewCommandSetExecuteEventParameters) {
     let formValues: FormValue = {} as any;
     let fieldsValue = event.selectedRows[0].fields;
-
     fieldsValue.map((item: SPField) => {
       if (item.fieldType == "Lookup") {
         let originValue = event.selectedRows[0].getValueByName(
@@ -86,19 +103,20 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
     });
 
     formValues.FileRef = event.selectedRows[0].getValueByName("FileRef");
-    formValues.UniqueId= event.selectedRows[0].getValueByName("UniqueId");
+    formValues.UniqueId = event.selectedRows[0].getValueByName("UniqueId");
 
     return formValues;
   }
 
   @override
   public onExecute(event: IListViewCommandSetExecuteEventParameters): void {
+    console.log(event);
     switch (event.itemId) {
       case "COMMAND_1":
-        console.log(event);
+
         let formValues = this._getformValuesFromFile(event);
         this._showPanel(formValues);
-        console.log(formValues);
+       
         break;
       case "COMMAND_2":
         this._showPanel();
@@ -113,6 +131,7 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
       formValues,
       listId: this.context.pageContext.list.id.toString(),
       onClose: async () => {
+
         this._dismissPanel();
       },
     });

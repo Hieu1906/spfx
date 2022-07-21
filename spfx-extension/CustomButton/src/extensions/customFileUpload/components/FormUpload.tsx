@@ -155,9 +155,9 @@ export class FormUploadComp extends BaseComponent<
             formvalues,
             formValues.FileLeafRef
           );
-          this.props.raiseOnChange();
+     
           await this.props.onclose();
-          window.location.reload();
+     
         } catch (error) {
           message.error(
             "Đã có lỗi xảy ra trong quá trình cập nhật tài liệu",
@@ -245,9 +245,7 @@ export class FormUploadComp extends BaseComponent<
           );
         })
       );
-
       message.success("Thêm mới chúng từ thành công", 3);
-      this.props.raiseOnChange();
       await this.props.onclose();
       window.location.reload();
     } catch (e) {

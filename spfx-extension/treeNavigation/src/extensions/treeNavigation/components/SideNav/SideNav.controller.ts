@@ -66,9 +66,7 @@ export class SideNavController {
         .web.lists.get();
       listFolders = lists.filter((item) => {
         return (
-          !this.defaultList.includes(item.Title) &&
-          item.BaseTemplate == 101 &&
-          item.DocumentTemplateUrl !== null
+          !this.defaultList.includes(item.Title) && item.BaseTemplate == 101
         );
       });
       if (listFolders && listFolders.length > 0) {
@@ -78,10 +76,9 @@ export class SideNavController {
             UniqueId: item.Id,
             Title: item.Title,
             TypeNode: TypeNode,
-            RelativeUrl: item.DocumentTemplateUrl.replace(
-              "/Forms/template.dotx",
-              ""
-            ).replace(/ /g, "%20"),
+            RelativeUrl: item.DocumentTemplateUrl
+              ? item.DocumentTemplateUrl.replace("/Forms/template.dotx", "")
+              : `${item.ParentWebPath.DecodedUrl}/Lists/${item.Title}`,
             Created: moment(item.Created),
             ParentId: parentNode.UniqueId,
             AbsoluteUrl: parentNode.AbsoluteUrl,
@@ -96,6 +93,12 @@ export class SideNavController {
         .folders.get();
 
       listFolders = listFolders.filter((item) => {
+        if (item.Name == "Shared Documents") {
+          return {
+            ...item,
+            Name: "Documents",
+          };
+        }
         return !this.defaultFolders.includes(item.Name);
       });
 
@@ -106,7 +109,7 @@ export class SideNavController {
             UniqueId: item.UniqueId,
             Title: item.Name,
             TypeNode: TypeNode,
-            RelativeUrl: item.ServerRelativeUrl.replace(/ /g, "%20"),
+            RelativeUrl: item.ServerRelativeUrl,
             Created: moment(item.TimeCreated),
             ParentId: parentNode.UniqueId,
             AbsoluteUrl: parentNode.AbsoluteUrl,

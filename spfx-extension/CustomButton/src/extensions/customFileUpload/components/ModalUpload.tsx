@@ -46,9 +46,6 @@ export default class ModalUploadFile extends BaseComponent<
       >
         <FormUpload
           formValues={this.props.formValues ? this.props.formValues : undefined}
-          raiseOnChange={() => {
-            this.props.raiseOnChange();
-          }}
           onclose={async () => {
             await this.props.onClose();
           }}

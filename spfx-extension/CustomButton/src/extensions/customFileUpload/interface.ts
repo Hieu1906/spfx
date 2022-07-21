@@ -38,7 +38,6 @@ export interface FormUploadProps extends FormComponentProps {
   context: ListViewCommandSetContext;
   search: (value: any) => Promise<void>;
   onclose: () => Promise<void>;
-  raiseOnChange: () => void;
   formValues?: FormValue;
 }
 
