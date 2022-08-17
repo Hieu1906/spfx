@@ -1,108 +1,154 @@
-import { Button, Col, Modal, Row } from "antd";
+import { sp } from "@pnp/sp";
+import "@pnp/sp/folders";
+import "@pnp/sp/items";
+import "@pnp/sp/lists";
+import "@pnp/sp/webs";
+import { Col, Modal, Row, Tabs } from "antd";
 import * as moment from "moment";
 import * as React from "react";
-import { IDataroom } from "../../../common/models/IDataroom";
-import { IDataroomSite } from "../../../common/models/IDataroomSite";
-import { dataroomService } from "../../../common/services/dataroomService";
-import { dataroomSitesService } from "../../../common/services/dataroomSiteService";
+import { BaseComponent } from "../../common/components/BaseComponent";
 import Avatar from "./avatar/Avatar";
 import styles from "./Homepage.module.scss";
 import { IHomepageProps } from "./IHomepageProps";
-import { groupBy } from "lodash";
-import * as strings from "DocumentAndSiteWebPartStrings";
-export interface IHomepageStates {
-  isModalVisible: boolean;
 
-  drsGroup?: {
-    Title: string;
-    Key: string;
-    BackgroundColor?: string;
-    ImgUrl?: string;
-  };
+export interface ITreeItem {
+  TypeNode: "DocLib" | "Site" | "Folder";
+  RelativeUrl: string;
+  AbsoluteUrl?: string;
+  Created: moment.Moment;
+  UniqueId: string;
+  Title: string;
+  IsLeaf?: boolean;
 }
 
-export default class Homepage extends React.Component<
+const { TabPane } = Tabs;
+export interface IHomepageStates {
+  isModalVisible: boolean;
+  parentSite: ITreeItem[];
+  subSiteLevel1: ITreeItem[];
+  titleModal:string
+}
+
+export default class Homepage extends BaseComponent<
   IHomepageProps,
   IHomepageStates
 > {
-  drsGroup: {
-    Title: string;
-    Key: string;
-    BackgroundColor?: string;
-    ImgUrl?: string;
-  }[] = [
-    {
-      Title: "Chứng từ lưu tạm",
-      Key: "Chng%20t%20lu%20tm",
-    },
-    {
-      Title: "Hồ sơ mua sắm",
-      Key: "MS",
-    },
-    {
-      Title: "Hồ sơ thanh toán",
-      Key: "TT",
-    },
-    {
-      Title: "Hồ sơ tạm ứng",
-      Key: "TU",
-    },
-  ];
   constructor(props: IHomepageProps) {
     super(props);
     this.state = {
       isModalVisible: false,
+      parentSite: [],
+      subSiteLevel1: [],
+      titleModal:""
     };
+    this.onMount(async () => {
+      await this.getParentSite();
+    });
+  }
+
+  public async getParentSite() {
+    let parentSiteUrl = `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt`;
+    let parentSite = await this.getSubSiteInCurrentSite(parentSiteUrl);
+    this.setState({
+      parentSite,
+    });
+  }
+
+  public async getItemInSubSiteLevel1(item: ITreeItem) {
+    let subSiteLevel1 = await this.getSubSiteInCurrentSite(item.AbsoluteUrl);
+    this.setState({
+      subSiteLevel1,
+    });
+  }
+
+  public async getSubSiteInCurrentSite(parentSite: string) {
+    let treeItem: ITreeItem[] = [];
+    let subSites = await sp.configure({}, parentSite).web.webs.get();
+    if (subSites && subSites.length > 0) {
+      subSites.forEach((item) => {
+        treeItem.push({
+          UniqueId: item.Id,
+          RelativeUrl: item.ServerRelativeUrl,
+          AbsoluteUrl: item.Url,
+          Title: item.Title,
+          TypeNode: "Site",
+          Created: moment(item.Created),
+        });
+      });
+    }
+    return treeItem || [];
   }
 
   renderModal() {
+    let { subSiteLevel1 } = this.state;
+
+    return (
+      subSiteLevel1.length > 0 && (
+        <Modal
+          width={752}
+          className={styles.modal}
+          footer={null}
+          title={this.state.titleModal&&this.state.titleModal}
+          visible={this.state.isModalVisible}
+          onCancel={() => {
+            this.setState({
+              isModalVisible: false,
+            });
+          }}
+        >
+          {subSiteLevel1.length > 1
+            ? this.renderItemByTab(subSiteLevel1)
+            : this.renderItem(subSiteLevel1[0])}
+        </Modal>
+      )
+    );
+  }
+
+  renderItemByTab(items: ITreeItem[]) {
+    return (
+      <Tabs>
+        {items.map((item) => (
+          <TabPane tab={<span>{item.Title}</span>} key={item.UniqueId}>
+            {this.renderItem(item)}
+          </TabPane>
+        ))}
+      </Tabs>
+    );
+  }
+
+  renderItem(item: ITreeItem) {
     let arr = [];
     for (let i = 2020; i <= moment().year(); i++) {
       arr.push(i);
     }
     return (
-      <Modal
-        width={700}
-        className={styles.modal}
-        footer={null}
-        title={this.state.drsGroup?.Title}
-        visible={this.state.isModalVisible}
-        onCancel={() => {
-          this.setState({
-            isModalVisible: false,
-          });
-        }}
-      >
-        <div className={styles.modal__listItem}>
-          {arr.map((item) => (
-            <div
-              onClick={() => {
-                window.open(
-                  `${this.props.context.pageContext.web.absoluteUrl}/${item}/${this.state.drsGroup.Key}`
-                );
-              }}
-              className={styles.modal__listItem__item}
-            >
-              <div className={styles.modal__listItem__item__wrapperIcon}>
-                {iconSite}
+      <div className={styles.modal__listItem}>
+        {arr.map((year) => (
+          <div
+            onClick={() => {
+              window.open(
+                `${item.AbsoluteUrl}/${year}`
+              );
+            }}
+            className={styles.modal__listItem__item}
+          >
+            <div className={styles.modal__listItem__item__wrapperIcon}>
+              {iconSite}
+            </div>
+            <div className={styles.modal__listItem__item__wrapperText}>
+              <div className={styles.modal__listItem__item__wrapperText__text}>
+                {item?.Title}
               </div>
-              <div className={styles.modal__listItem__item__wrapperText}>
-                <div
-                  className={styles.modal__listItem__item__wrapperText__text}
-                >
-                  {this.state.drsGroup?.Title}
-                </div>
-                <div
-                  style={{ fontWeight: "bold" }}
-                  className={styles.modal__listItem__item__wrapperText__text}
-                >
-                  Năm {item}
-                </div>
+              <div
+                style={{ fontWeight: "bold" }}
+                className={styles.modal__listItem__item__wrapperText__text}
+              >
+                Năm {year}
               </div>
             </div>
-          ))}
-        </div>
-      </Modal>
+          </div>
+        ))}
+      </div>
     );
   }
 
@@ -117,22 +163,19 @@ export default class Homepage extends React.Component<
           </div>
 
           <Row gutter={32} className={styles.drsParentContainer}>
-            {this.drsGroup.map((item) => (
+            {this.state.parentSite.map((item) => (
               <Col span={6}>
                 <a
                   className={styles.drsContainer}
-                  onClick={() => {
+                  onClick={async () => {
                     this.setState({
                       isModalVisible: true,
-
-                      drsGroup: item,
+                      titleModal:item.Title
                     });
+                    this.getItemInSubSiteLevel1(item);
                   }}
                 >
-                  <Avatar
-                    title={item.Title}
-                    imageUrl={item?.ImgUrl ? item.ImgUrl : undefined}
-                  />
+                  <Avatar title={item.Title} />
                   <div className={styles.drsTitle}>{item.Title}</div>
                 </a>
               </Col>

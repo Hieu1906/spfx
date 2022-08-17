@@ -3,7 +3,7 @@ import styles from "./../Homepage.module.scss";
 
 export interface IProps {
   title: string;
-  imageUrl?: string;
+
 }
 export interface IStates {
   
@@ -59,15 +59,7 @@ export default class Avatar extends React.Component<IProps, IStates> {
 
 
   public render(): React.ReactElement<IProps> {
-    return this.props.imageUrl ? (
-      <img
-        src={this.props.imageUrl}
-        style={{
-          minWidth: "80px",
-          height: "80px",
-        }}
-      />
-    ) : (
+    return (
       <div
         style={{
           display: "flex",
@@ -80,6 +72,8 @@ export default class Avatar extends React.Component<IProps, IStates> {
       >
         <div className={styles.avaTitle}> {this.getAvt().title}</div>
       </div>
-    );
+    )
+      
+
   }
 }

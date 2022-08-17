@@ -36,11 +36,11 @@ export default class TreeNavigationApplicationCustomizer extends BaseApplication
       "https://cdnjs.cloudflare.com/ajax/libs/antd/3.26.19/antd.css"
     );
     SPComponentLoader.loadCss(
-      `${this.context.pageContext.site.absoluteUrl}/apps/rfa/adms/Documents/hidenNavDefault.css`
+      `${this.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt/Documents/hidenNavDefault.css`
 
     );
     SPComponentLoader.loadCss(
-      `${this.context.pageContext.site.absoluteUrl}/apps/rfa/adms/Shared%20Documents/hidenNavDefault.css`
+      `${this.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt/Shared%20Documents/hidenNavDefault.css`
 
     );
 

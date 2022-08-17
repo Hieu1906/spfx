@@ -29,6 +29,9 @@ export default class SearchDocumentsWebPart extends BaseClientSideWebPart<ISearc
     SPComponentLoader.loadCss(
       "https://cdnjs.cloudflare.com/ajax/libs/antd/3.26.19/antd.css"
     );
+    SPComponentLoader.loadCss(
+      `${this.context.pageContext.site.absoluteUrl}/apps/rfa/adms/Shared%20Documents/hidenNavDefault.css`
+    );
     this.customCss();
     console.log(this.context);
   }
@@ -73,7 +76,6 @@ export default class SearchDocumentsWebPart extends BaseClientSideWebPart<ISearc
                   min: 2,
                   max: 20,
                   step: 1,
-                  
                 }),
               ],
             },

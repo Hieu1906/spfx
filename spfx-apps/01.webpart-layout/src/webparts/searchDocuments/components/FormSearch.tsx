@@ -153,7 +153,7 @@ export class FormSearchComp extends BaseComponent<
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
     let chinhanh = await chiNhanhService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     });
     this.setState({
       chinhanh,
@@ -165,7 +165,7 @@ export class FormSearchComp extends BaseComponent<
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
     let duAn = await duAnService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     });
 
     this.setState({
@@ -178,7 +178,7 @@ export class FormSearchComp extends BaseComponent<
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
     let nhaCungCap = await nhaCungCapService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     })
 
     this.setState({
@@ -191,7 +191,7 @@ export class FormSearchComp extends BaseComponent<
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
     let nhomChungTu = await nhomCTService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     });
 
     this.setState({
@@ -204,7 +204,7 @@ export class FormSearchComp extends BaseComponent<
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
     let loaiChungTuKeToan = await loaiCTKTService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     });
 
     this.setState({
@@ -217,7 +217,7 @@ export class FormSearchComp extends BaseComponent<
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
     let loaiChungTu = await loaiCTService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     });
     this.setState({
       loaiChungTu,
@@ -229,7 +229,7 @@ export class FormSearchComp extends BaseComponent<
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
     let maCK = await maCKService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     });
     this.setState({
       maCK,
@@ -241,7 +241,7 @@ export class FormSearchComp extends BaseComponent<
       ? `${this.props.context.pageContext.web.absoluteUrl}/${year}/${subsite}`
       : `${this.props.context.pageContext.web.absoluteUrl}/${year}`;
     let tKNH = await tKNHService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     });
     this.setState({
       tKNH,

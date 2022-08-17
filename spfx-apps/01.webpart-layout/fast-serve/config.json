@@ -4,7 +4,7 @@
     "isLibraryComponent": false
   },
   "serve": {
-    "openUrl": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/adms/SitePages/Search.aspx?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js",
+    "openUrl": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/khoctkt/SitePages/HomePage.aspx?keyword=2022?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js",
     "fullScreenErrors": true
   }
 }

@@ -26,6 +26,10 @@ export default class HomepageWebPart extends BaseClientSideWebPart<IHomepageWebP
     SPComponentLoader.loadCss(
       "https://cdnjs.cloudflare.com/ajax/libs/antd/3.26.19/antd.css"
     );
+    SPComponentLoader.loadCss(
+      `${this.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt/Shared%20Documents/hidenNavDefault.css`
+
+    );
   }
   public render(): void {
     const element: React.ReactElement<IHomepageProps> = React.createElement(
