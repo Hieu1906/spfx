@@ -41,7 +41,6 @@ export default class TreeNavigationApplicationCustomizer extends BaseApplication
     );
     SPComponentLoader.loadCss(
       `${this.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt/Shared%20Documents/hidenNavDefault.css`
-
     );
 
     console.log(this.context);

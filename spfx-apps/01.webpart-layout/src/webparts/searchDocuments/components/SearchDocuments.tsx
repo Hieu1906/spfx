@@ -71,28 +71,7 @@ export default class SearchDocuments extends BaseComponent<
     };
     this.onMount(async () => {
       this.getWidthViewTable();
-      await this.initSearch();
     });
-  }
-
-  async initSearch() {
-    let keyword = Global.Functions.getParameterByName("keyword");
-    let year = Global.Functions.getParameterByName("year");
-    await this.handelSearch({
-      TypeDoc: "LT",
-      Year: year ? parseInt(year) : moment().year(),
-      KeyWord: keyword ? keyword : undefined,
-    });
-    if (keyword) {
-      this.formSearchRef.current.props.form.setFieldsValue({
-        KeyWord: keyword,
-      });
-    }
-    if (year) {
-      this.formSearchRef.current.props.form.setFieldsValue({
-        Year: year,
-      });
-    }
   }
 
   getWidthViewTable() {
@@ -122,10 +101,10 @@ export default class SearchDocuments extends BaseComponent<
         "DuAn/ID",
         "NhaCungCap/TenNCC",
         "NhaCungCap/ID",
-        "NhomChungTu/NhomChungTu",
-        "NhomChungTu/ID",
-        "LoaiChungTu/TenLoaiChungTu",
-        "LoaiChungTu/ID",
+        // "NhomChungTu/NhomChungTu",
+        // "NhomChungTu/ID",
+        // "LoaiChungTu/TenLoaiChungTu",
+        // "LoaiChungTu/ID",
         "MaChungKhoan/ID",
         "MaChungKhoan/MaChungKhoan",
         "LoaiChungTuKeToan/ID",
@@ -140,8 +119,8 @@ export default class SearchDocuments extends BaseComponent<
         "ChiNhanh",
         "DuAn",
         "NhaCungCap",
-        "NhomChungTu",
-        "LoaiChungTu",
+        // "NhomChungTu",
+        // "LoaiChungTu",
         "LoaiChungTuKeToan",
         "MaChungKhoan",
         "TaiKhoanNganHang",
@@ -232,45 +211,16 @@ export default class SearchDocuments extends BaseComponent<
     let allFileFilter: any[];
     let query = this.buildQuery(formvalues);
     try {
-      // config site  để thực hiện search
-      if (formvalues.TypeDoc == "LT") {
-        let docLibName = "Chứng từ lưu tạm";
-        allFileFilter = await this.getFilesInforByFolderPath(
-          docLibName,
-          `${this.props.context.pageContext.web.absoluteUrl}/${formvalues.Year}`,
-          query
-        );
-      } else {
-        let arrMonth = [
-          "01",
-          "02",
-          "03",
-          "04",
-          "05",
-          "06",
-          "07",
-          "08",
-          "09",
-          "10",
-          "11",
-          "12",
-        ];
-        let result = await Promise.all(
-          arrMonth.map(async (item) => {
-            return this.getFilesInforByFolderPath(
-              item,
-              `${this.props.context.pageContext.web.absoluteUrl}/${formvalues.Year}/${formvalues.TypeDoc}`,
-              query
-            );
-          })
-        );
+      allFileFilter = await this.getFilesInforByFolderPath(
+        formvalues.Folder,
+        `${formvalues.LoaiCT}/${formvalues.Year}`,
+        query
+      );
 
-        allFileFilter = flatten(result);
-      }
       allFileFilter = allFileFilter.filter((item) => {
         return item.File?.Name;
       });
-      console.log(allFileFilter);
+     
       this.setState({
         DataSource: allFileFilter as any[],
       });
@@ -355,15 +305,15 @@ export default class SearchDocuments extends BaseComponent<
             </Tag>
           ),
       },
-      {
-        title: "Nhóm chứng từ",
-        dataIndex: "NhomChungTuId",
-        key: "NhomChungTuId",
-        width: 200,
-        render: (text: string, record: ResultFile, index) => (
-          <p>{record.NhomChungTu?.NhomChungTu}</p>
-        ),
-      },
+      // {
+      //   title: "Nhóm chứng từ",
+      //   dataIndex: "NhomChungTuId",
+      //   key: "NhomChungTuId",
+      //   width: 200,
+      //   render: (text: string, record: ResultFile, index) => (
+      //     <p>{record.NhomChungTu?.NhomChungTu}</p>
+      //   ),
+      // },
       {
         title: "Số chứng từ",
         dataIndex: "SoChungTu",
@@ -459,16 +409,16 @@ export default class SearchDocuments extends BaseComponent<
           <p>{record.NhaCungCap?.TenNCC}</p>
         ),
       },
-      {
-        title: "Loại chứng từ",
-        dataIndex: "LoaiChungTu",
-        key: "LoaiChungTuId",
-        width: 200,
+      // {
+      //   title: "Loại chứng từ",
+      //   dataIndex: "LoaiChungTu",
+      //   key: "LoaiChungTuId",
+      //   width: 200,
 
-        render: (text: string, record: ResultFile, index) => (
-          <p>{record?.LoaiChungTu?.TenLoaiChungTu}</p>
-        ),
-      },
+      //   render: (text: string, record: ResultFile, index) => (
+      //     <p>{record?.LoaiChungTu?.TenLoaiChungTu}</p>
+      //   ),
+      // },
       {
         title: "Loại chứng từ KT",
         dataIndex: "LoaiChungTuKeToan",

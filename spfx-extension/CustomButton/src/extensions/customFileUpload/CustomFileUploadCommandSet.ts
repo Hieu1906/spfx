@@ -23,6 +23,7 @@ import {
   SPField,
 } from "./interface";
 import * as moment from "moment";
+import { SPComponentLoader } from "@microsoft/sp-loader";
 
 const LOG_SOURCE: string = "CustomFileUploadCommandSet";
 
@@ -35,7 +36,9 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
       spfxContext: this.context,
     });
     this.canViewButton = await this.checkShowButton();
-
+    SPComponentLoader.loadCss(
+      "https://cdnjs.cloudflare.com/ajax/libs/antd/3.26.19/antd.css"
+    );
     Log.info(LOG_SOURCE, "Initialized CustomFileUploadCommandSet");
     this.panelDomElement = document.body.appendChild(
       document.createElement("div")
@@ -43,7 +46,7 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
   }
 
   async checkShowButton() {
-    let doclib = sp.web.lists.getByTitle("Chứng từ lưu tạm");
+    let doclib = sp.web.lists.getByTitle("ChungTuLuuTam");
 
     const canViewButton = await doclib.currentUserHasPermissions(
       PermissionKind.AddListItems
@@ -66,16 +69,16 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
         event.selectedRows.length === 1 && this.canViewButton;
     }
     if (uploadFile) {
+      console.log("lolo");
+      console.log(this.checkVisible());
+      console.log(this.canViewButton);
       // This command should be hidden unless exactly one row is selected.
       uploadFile.visible = this.checkVisible() && this.canViewButton;
     }
   }
 
   checkVisible() {
-    return (
-      this.context.pageContext.list.title.toLocaleLowerCase() ==
-      "chứng từ lưu tạm"
-    );
+    return this.context.pageContext.list.title == "ChungTuLuuTam";
   }
   _getformValuesFromFile(event: IListViewCommandSetExecuteEventParameters) {
     let formValues: FormValue = {} as any;
@@ -113,10 +116,9 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
     console.log(event);
     switch (event.itemId) {
       case "COMMAND_1":
-
         let formValues = this._getformValuesFromFile(event);
         this._showPanel(formValues);
-       
+
         break;
       case "COMMAND_2":
         this._showPanel();
@@ -131,7 +133,6 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
       formValues,
       listId: this.context.pageContext.list.id.toString(),
       onClose: async () => {
-
         this._dismissPanel();
       },
     });

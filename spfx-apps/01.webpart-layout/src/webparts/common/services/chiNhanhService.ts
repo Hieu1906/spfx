@@ -3,7 +3,7 @@ import { ChiNhanh } from "../models/ChiNhanh";
 import { BaseService } from "./baseService";
 
 export class ChiNhanhService extends BaseService<ChiNhanh> {
-  listName = "Chi Nhánh";
+  listName = "ChiNhanh";
   site = "";
 }
 

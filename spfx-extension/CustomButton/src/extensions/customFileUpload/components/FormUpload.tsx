@@ -76,10 +76,7 @@ export class FormUploadComp extends BaseComponent<
       maCK: [],
       tKNH: [],
       loading: false,
-      selectedFolder: {
-        Name: "Chứng từ lưu tạm",
-        ServerRelativeUrl: `Chng t lu tm`,
-      },
+ 
     };
     this.onMount(async () => {
       this.setState({
@@ -180,13 +177,11 @@ export class FormUploadComp extends BaseComponent<
           this.setState({
             loading: true,
           });
-          let serverRelativeUrl = this.state.selectedFolder
-            ? this.state.selectedFolder.ServerRelativeUrl
-            : "Chng t lu tm";
+        
           let fileCheck: FileCheck[] = await Promise.all(
             formvalues.FileUpload?.fileList.map(async (file: File) => {
               const exists = await sp.web
-                .getFolderByServerRelativePath(serverRelativeUrl)
+                .getFolderByServerRelativePath("ChungTuLuuTam")
                 .files.getByName(file.name)
                 .exists();
               return {
@@ -201,9 +196,9 @@ export class FormUploadComp extends BaseComponent<
           let fileEXists: FileCheck[] = filter(fileCheck, { exists: true });
 
           if (fileEXists?.length > 0) {
-            this.showWarning(fileEXists, formvalues, serverRelativeUrl);
+            this.showWarning(fileEXists, formvalues, "ChungTuLuuTam");
           } else {
-            await this.saveFile(formvalues, serverRelativeUrl);
+            await this.saveFile(formvalues, "ChungTuLuuTam");
           }
         } catch (error) {
           message.error(
@@ -491,37 +486,7 @@ export class FormUploadComp extends BaseComponent<
                       )}
                     </Form.Item>
                   </Col>
-                  <Col span={12}>
-                    <Form.Item
-                      wrapperCol={{ span: 16 }}
-                      labelCol={{ span: 8 }}
-                      label="Đường dẫn"
-                    >
-                      {getFieldDecorator(
-                        "Path",
-                        {}
-                      )(
-                        <FolderPicker
-                          key={"id"}
-                          context={this.props.context}
-                          label=""
-                          required={false}
-                          rootFolder={{
-                            Name: "Chứng từ lưu tạm",
-                            ServerRelativeUrl: `Chng t lu tm`,
-                          }}
-                          defaultFolder={this.state.selectedFolder}
-                          onSelect={(folder) => {
-                            this.setState({
-                              selectedFolder: folder,
-                            });
-                          }}
-                          ref={this.folderPickerRef}
-                          canCreateFolders={true}
-                        />
-                      )}
-                    </Form.Item>
-                  </Col>
+          
                 </Row>
               )}
 
@@ -589,8 +554,7 @@ export class FormUploadComp extends BaseComponent<
                       "BoPhanThucHienId",
                       {}
                     )(
-                      <div style={{ marginTop: -23 }}>
-                        {" "}
+                      <div >
                         <PeoplePicker
                           ref={this.peoplePickerRef}
                           key={"id"}

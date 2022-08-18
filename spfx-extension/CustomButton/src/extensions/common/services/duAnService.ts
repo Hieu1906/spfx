@@ -3,7 +3,7 @@ import { DuAn } from "../models/DuAn";
 import { BaseService } from "./baseService";
 
 export class DuAnService extends BaseService<DuAn> {
-  listName = "Dự án";
+  listName = "DuAn";
   site = "";
 }
 

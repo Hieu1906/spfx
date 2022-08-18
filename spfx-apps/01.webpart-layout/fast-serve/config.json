@@ -4,7 +4,7 @@
     "isLibraryComponent": false
   },
   "serve": {
-    "openUrl": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/khoctkt/SitePages/HomePage.aspx?keyword=2022?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js",
+    "openUrl": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/khoctkt/SitePages/T%C3%ACm-ki%E1%BA%BFm-t%C3%A0i-li%E1%BB%87u.aspx?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js&baseUrl=https://1work.sharepoint.com/sites/ssisit/apps/rfa/khoctkt/gl-khach-hang/journal/2022",
     "fullScreenErrors": true
   }
 }

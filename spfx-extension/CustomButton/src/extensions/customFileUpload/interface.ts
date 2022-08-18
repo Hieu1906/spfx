@@ -58,7 +58,6 @@ export interface FormUploadState {
   tKNH: TaiKhoanNganHang[];
   loading: boolean;
   BoPhanThucHienId?: number;
-  selectedFolder: IFolder;
 }
 /**
  * If your command set uses the ClientSideComponentProperties JSON input,

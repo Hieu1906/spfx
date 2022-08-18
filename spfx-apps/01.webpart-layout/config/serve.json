@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/core-build/serve.schema.json",
   "port": 4321,
   "https": true,
-  "initialPage": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/adms/SitePages/Search.aspx?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js",
+  "initialPage": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/khoctkt/SitePages/T%C3%ACm-ki%E1%BA%BFm-t%C3%A0i-li%E1%BB%87u.aspx?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js",
   "api": {
     "port": 5432,
     "entryPath": "node_modules/@microsoft/sp-webpart-workbench/lib/api/"
