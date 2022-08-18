@@ -1,7 +1,7 @@
 export interface NhomChungTu {
   Id: number;
   Title: string;
-  NhomChungTu:string;
+  TenNhomChungTu:string;
   TrangThai:boolean;
   Created:Date
 

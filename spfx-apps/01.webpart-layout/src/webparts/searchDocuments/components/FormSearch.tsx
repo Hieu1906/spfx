@@ -27,8 +27,10 @@ import { TaiKhoanNganHang } from "../../common/models/TaiKhoanNganHang";
 import { chiNhanhService } from "../../common/services/chiNhanhService";
 import { duAnService } from "../../common/services/duAnService";
 import { loaiCTKTService } from "../../common/services/loaiChungTuKeToanService";
+import { loaiCTService } from "../../common/services/loaiChungTuService";
 import { maCKService } from "../../common/services/maChungKhoanService";
 import { nhaCungCapService } from "../../common/services/nhaCungCapService";
+import { nhomCTService } from "../../common/services/nhomChungTuService";
 import { tKNHService } from "../../common/services/taiKhoanNganHangService";
 import styles from "./SearchDocuments.module.scss";
 export interface ISiteInfor {
@@ -57,8 +59,8 @@ interface FormSearchState {
   tKNH: TaiKhoanNganHang[];
   loading: boolean;
   BoPhanThucHienId?: number;
-  nhomCT: ISiteInfor[];
-  loaiCT: ISiteInfor[];
+  siteNhomCTs: ISiteInfor[];
+  siteLoaiCTs: ISiteInfor[];
 }
 const formItemLayout = {
   labelCol: {
@@ -123,8 +125,8 @@ export class FormSearchComp extends BaseComponent<
       loaiChungTu: [],
       maCK: [],
       tKNH: [],
-      nhomCT: [],
-      loaiCT: [],
+      siteNhomCTs: [],
+      siteLoaiCTs: [],
       loading: false,
     };
     this.onMount(async () => {
@@ -134,7 +136,7 @@ export class FormSearchComp extends BaseComponent<
       await this.initSearch();
       await this.loadMetaData(
         this.props.form.getFieldValue("Year"),
-        this.props.form.getFieldValue("LoaiCT")
+        this.props.form.getFieldValue("SiteLoaiCT")
       );
 
       this.setState({
@@ -154,26 +156,27 @@ export class FormSearchComp extends BaseComponent<
     let loaiCT_Url = urlSplitted[8]
       ? `${this.props.context.pageContext.web.absoluteUrl}/${urlSplitted[8]}/${urlSplitted[9]}`
       : undefined;
-    await this.getParentSite();
+    await this.getSiteNhomCTs();
     if (nhomCT_Url) {
       this.props.form.setFieldsValue({
-        NhomCT: nhomCT_Url,
+        SiteNhomCT: nhomCT_Url,
       });
     } else {
       this.props.form.setFieldsValue({
-        NhomCT: this.state.nhomCT[0].AbsoluteUrl,
+        SiteNhomCT: this.state.siteNhomCTs[0].AbsoluteUrl,
       });
     }
     if (loaiCT_Url) {
-      await this.getLoaiCT(loaiCT_Url);
+      await this.getSiteLoaiCTs(nhomCT_Url);
+      console.log(this.state.siteLoaiCTs);
       this.props.form.setFieldsValue({
-        LoaiCT: loaiCT_Url,
+        SiteLoaiCT: loaiCT_Url,
       });
     } else {
-      let absoluteUrl = this.state.nhomCT[0].AbsoluteUrl;
-      await this.getLoaiCT(absoluteUrl);
+      let absoluteUrl = this.state.siteNhomCTs[0].AbsoluteUrl;
+      await this.getSiteLoaiCTs(absoluteUrl);
       this.props.form.setFieldsValue({
-        LoaiCT: this.state.loaiCT[0].AbsoluteUrl,
+        SiteLoaiCT: this.state.siteLoaiCTs[0].AbsoluteUrl,
       });
     }
 
@@ -221,24 +224,24 @@ export class FormSearchComp extends BaseComponent<
     });
   }
 
-  public async getParentSite() {
+  public async getSiteNhomCTs() {
     let parentSiteUrl = `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt`;
-    let nhomCT = await this.getSubSiteInCurrentSite(parentSiteUrl);
+    let siteNhomCTs = await this.getSubSiteInCurrentSite(parentSiteUrl);
     this.setState({
-      nhomCT,
+      siteNhomCTs,
     });
   }
 
-  public async getLoaiCT(absoluteUrl: string) {
-    let loaiCT = await this.getSubSiteInCurrentSite(absoluteUrl);
+  public async getSiteLoaiCTs(absoluteUrl: string) {
+    let siteLoaiCTs = await this.getSubSiteInCurrentSite(absoluteUrl);
     this.setState({
-      loaiCT,
+      siteLoaiCTs,
     });
   }
 
-  public async getSubSiteInCurrentSite(nhomCT: string) {
+  public async getSubSiteInCurrentSite(siteNhomCTs: string) {
     let treeItem: ISiteInfor[] = [];
-    let subSites = await sp.configure({}, nhomCT).web.webs.get();
+    let subSites = await sp.configure({}, siteNhomCTs).web.webs.get();
     if (subSites && subSites.length > 0) {
       subSites.forEach((item) => {
         treeItem.push({
@@ -255,24 +258,44 @@ export class FormSearchComp extends BaseComponent<
   }
 
   async loadMetaData(year: number, absoluteUrl: string) {
-    await Promise.all([
-      this.getChiNhanh(year, absoluteUrl),
-      this.getDuAn(year, absoluteUrl),
-      this.getNhaCungCap(year, absoluteUrl),
-      this.getLoaiChungTuKeToan(year, absoluteUrl),
-      this.getMaCK(year, absoluteUrl),
-      this.getTKNH(year, absoluteUrl),
-    ]);
+    this.setState({
+      loading: true,
+    });
+    year = year ? year : moment().year();
+    try {
+      await Promise.all([
+        this.getChiNhanh(year, absoluteUrl),
+        this.getDuAn(year, absoluteUrl),
+        this.getNhaCungCap(year, absoluteUrl),
+        this.getLoaiChungTuKeToan(year, absoluteUrl),
+        this.getMaCK(year, absoluteUrl),
+        this.getTKNH(year, absoluteUrl),
+        this.getNhomChungTu(year, absoluteUrl),
+        this.getLoaiChungTu(year, absoluteUrl),
+      ]);
+    } catch (error) {
+      console.error("Có lỗi xảy ra trong quá trình lấy thông");
+    } finally {
+      this.setState({
+        loading: false,
+      });
+    }
   }
 
   async getChiNhanh(year: number, absoluteUrl: string) {
-    chiNhanhService.site = `${absoluteUrl}/${year}`;
-    let chinhanh = await chiNhanhService.getAll({
-      filter: "TrangThai ne 1",
-    });
-    this.setState({
-      chinhanh,
-    });
+    try {
+      chiNhanhService.site = `${absoluteUrl}/${year}`;
+      let chinhanh = await chiNhanhService.getAll({
+        filter: "TrangThai ne 1",
+      });
+      this.setState({
+        chinhanh,
+      });
+    } catch (error) {
+      this.setState({
+        chinhanh: [],
+      });
+    }
   }
 
   async getDuAn(year: number, absoluteUrl: string) {
@@ -287,47 +310,103 @@ export class FormSearchComp extends BaseComponent<
   }
 
   async getNhaCungCap(year: number, absoluteUrl: string) {
-    nhaCungCapService.site = `${absoluteUrl}/${year}`;
-    let nhaCungCap = await nhaCungCapService.getAll({
-      filter: "TrangThai ne 1",
-    });
+    try {
+      nhaCungCapService.site = `${absoluteUrl}/${year}`;
+      let nhaCungCap = await nhaCungCapService.getAll({
+        filter: "TrangThai ne 1",
+      });
 
-    this.setState({
-      nhaCungCap,
-    });
+      this.setState({
+        nhaCungCap,
+      });
+    } catch (error) {
+      this.setState({
+        nhaCungCap: [],
+      });
+    }
   }
 
   async getLoaiChungTuKeToan(year: number, absoluteUrl: string) {
-    loaiCTKTService.site = `${absoluteUrl}/${year}`;
-    let loaiChungTuKeToan = await loaiCTKTService.getAll({
-      filter: "TrangThai ne 1",
-    });
+    try {
+      loaiCTKTService.site = `${absoluteUrl}/${year}`;
+      let loaiChungTuKeToan = await loaiCTKTService.getAll({
+        filter: "TrangThai ne 1",
+      });
 
-    this.setState({
-      loaiChungTuKeToan,
-    });
+      this.setState({
+        loaiChungTuKeToan,
+      });
+    } catch (error) {
+      this.setState({
+        loaiChungTuKeToan: [],
+      });
+    }
   }
 
   async getMaCK(year: number, absoluteUrl: string) {
-    maCKService.site = `${absoluteUrl}/${year}`;
-    let maCK = await maCKService.getAll({
-      filter: "TrangThai ne 1",
-    });
-    this.setState({
-      maCK,
-    });
+    try {
+      maCKService.site = `${absoluteUrl}/${year}`;
+      let maCK = await maCKService.getAll({
+        filter: "TrangThai ne 1",
+      });
+      this.setState({
+        maCK,
+      });
+    } catch (error) {
+      this.setState({
+        maCK: [],
+      });
+    }
   }
 
   async getTKNH(year: number, absoluteUrl: string) {
-    tKNHService.site = `${absoluteUrl}/${year}`;
-    let tKNH = await tKNHService.getAll({
-      filter: "TrangThai ne 1",
-    });
-    this.setState({
-      tKNH,
-    });
+    try {
+      tKNHService.site = `${absoluteUrl}/${year}`;
+      let tKNH = await tKNHService.getAll({
+        filter: "TrangThai ne 1",
+      });
+      this.setState({
+        tKNH,
+      });
+    } catch (error) {
+      this.setState({
+        tKNH: [],
+      });
+    }
   }
 
+  async getNhomChungTu(year: number, absoluteUrl: string) {
+    try {
+      nhomCTService.site = `${absoluteUrl}/${year}`;
+      let nhomChungTu = await nhomCTService.getAll({
+        filter: "TrangThai ne 1",
+      });
+
+      this.setState({
+        nhomChungTu,
+      });
+    } catch (error) {
+      this.setState({
+        nhomChungTu: [],
+      });
+    }
+  }
+
+  async getLoaiChungTu(year: number, absoluteUrl: string) {
+    try {
+      loaiCTService.site = `${absoluteUrl}/${year}`;
+      let loaiChungTu = await loaiCTService.getAll({
+        filter: "TrangThai ne 1",
+      });
+      this.setState({
+        loaiChungTu,
+      });
+    } catch (error) {
+      this.setState({
+        loaiChungTu: [],
+      });
+    }
+  }
 
   reset() {
     this.setState({
@@ -343,14 +422,7 @@ export class FormSearchComp extends BaseComponent<
 
   public render(): React.ReactElement<FormSearchProps> {
     const { getFieldDecorator } = this.props.form;
-    let initialValueNhomCT =
-      this.state.loaiCT?.length > 0
-        ? this.state.nhomCT[0].AbsoluteUrl
-        : undefined;
-    let initialValueLoaiCT =
-      this.state.loaiCT?.length > 0
-        ? this.state.loaiCT[0].AbsoluteUrl
-        : undefined;
+
     return (
       <Spin spinning={this.state.loading}>
         <div
@@ -380,18 +452,26 @@ export class FormSearchComp extends BaseComponent<
                 styles.searchDocuments__searchForm__form__wrapperByGroup
               }
             >
-              <Form.Item label="Nhóm chứng từ">
-                {getFieldDecorator("NhomCT", {
-                  initialValue: initialValueNhomCT,
-                })(
+              <Form.Item label="Site nhóm chứng từ">
+                {getFieldDecorator(
+                  "SiteNhomCT",
+                  {}
+                )(
                   <Select
                     onSelect={async (value) => {
                       this.props.form.resetFields(fieldCanReset);
-                      this.props.form.resetFields(["LoaiCT", "Year"]);
-                      await this.getLoaiCT(value as string);
+                      this.props.form.resetFields(["SiteLoaiCT", "Year"]);
+                      await this.getSiteLoaiCTs(value as string);
+                      await this.loadMetaData(
+                        moment().year(),
+                        this.state.siteLoaiCTs[0].AbsoluteUrl
+                      );
+                      this.props.form.setFieldsValue({
+                        SiteLoaiCT: this.state.siteLoaiCTs[0].AbsoluteUrl,
+                      });
                     }}
                   >
-                    {this.state.nhomCT.map((item) => (
+                    {this.state.siteNhomCTs.map((item) => (
                       <Select.Option
                         key={item.UniqueId}
                         value={item.AbsoluteUrl}
@@ -402,18 +482,20 @@ export class FormSearchComp extends BaseComponent<
                   </Select>
                 )}
               </Form.Item>
-              <Form.Item label="Loại chứng từ">
-                {getFieldDecorator("LoaiCT", {
-                  initialValue: initialValueLoaiCT,
-                })(
+              <Form.Item label="Site loại chứng từ">
+                {getFieldDecorator(
+                  "SiteLoaiCT",
+                  {}
+                )(
                   <Select
                     showSearch
-                    onSelect={(value) => {
+                    onSelect={async (value) => {
                       this.props.form.resetFields(fieldCanReset);
                       this.props.form.resetFields(["Year"]);
+                      await this.loadMetaData(moment().year(), value as string);
                     }}
                   >
-                    {this.state.loaiCT.map((item) => (
+                    {this.state.siteLoaiCTs.map((item) => (
                       <Select.Option
                         key={item.UniqueId}
                         value={item.AbsoluteUrl}
@@ -432,6 +514,10 @@ export class FormSearchComp extends BaseComponent<
                     showSearch
                     onSelect={async (value: any) => {
                       this.props.form.resetFields(fieldCanReset);
+                      await this.loadMetaData(
+                        value,
+                        this.props.form.getFieldValue("SiteLoaiCT")
+                      );
                     }}
                   >
                     {years.map((item) => (
@@ -469,6 +555,42 @@ export class FormSearchComp extends BaseComponent<
                 styles.searchDocuments__searchForm__form__wrapperByGroup
               }
             >
+              <Form.Item label="Nhóm chứng từ">
+                {getFieldDecorator(
+                  "NhomChungTuId",
+                  {}
+                )(
+                  <Select
+                    showSearch
+                    allowClear
+                    disabled={this.state.nhomChungTu?.length > 0 ? false : true}
+                  >
+                    {this.state.nhomChungTu?.map((item) => (
+                      <Select.Option value={item.Id} key={item.Id.toString()}>
+                        {item.TenNhomChungTu}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                )}
+              </Form.Item>
+              <Form.Item label="Loại chứng từ:">
+                {getFieldDecorator(
+                  "LoaiChungTuId",
+                  {}
+                )(
+                  <Select
+                    showSearch
+                    allowClear
+                    disabled={this.state.loaiChungTu?.length > 0 ? false : true}
+                  >
+                    {this.state.loaiChungTu?.map((item) => (
+                      <Select.Option value={item.Id} key={item.Id.toString()}>
+                        {item.TenLoaiChungTu}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                )}
+              </Form.Item>
               <Form.Item label="Chi nhánh">
                 {getFieldDecorator(
                   "ChiNhanhId",

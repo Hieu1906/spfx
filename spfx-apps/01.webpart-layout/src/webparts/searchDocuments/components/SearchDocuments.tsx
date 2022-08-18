@@ -101,10 +101,10 @@ export default class SearchDocuments extends BaseComponent<
         "DuAn/ID",
         "NhaCungCap/TenNCC",
         "NhaCungCap/ID",
-        // "NhomChungTu/NhomChungTu",
-        // "NhomChungTu/ID",
-        // "LoaiChungTu/TenLoaiChungTu",
-        // "LoaiChungTu/ID",
+        "NhomChungTu/NhomChungTu",
+        "NhomChungTu/ID",
+        "LoaiChungTu/TenLoaiChungTu",
+        "LoaiChungTu/ID",
         "MaChungKhoan/ID",
         "MaChungKhoan/MaChungKhoan",
         "LoaiChungTuKeToan/ID",
@@ -119,8 +119,8 @@ export default class SearchDocuments extends BaseComponent<
         "ChiNhanh",
         "DuAn",
         "NhaCungCap",
-        // "NhomChungTu",
-        // "LoaiChungTu",
+        "NhomChungTu",
+        "LoaiChungTu",
         "LoaiChungTuKeToan",
         "MaChungKhoan",
         "TaiKhoanNganHang",
@@ -213,7 +213,7 @@ export default class SearchDocuments extends BaseComponent<
     try {
       allFileFilter = await this.getFilesInforByFolderPath(
         formvalues.Folder,
-        `${formvalues.LoaiCT}/${formvalues.Year}`,
+        `${formvalues.SiteLoaiCT}/${formvalues.Year}`,
         query
       );
 

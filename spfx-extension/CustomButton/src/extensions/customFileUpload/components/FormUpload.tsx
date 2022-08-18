@@ -76,7 +76,6 @@ export class FormUploadComp extends BaseComponent<
       maCK: [],
       tKNH: [],
       loading: false,
- 
     };
     this.onMount(async () => {
       this.setState({
@@ -152,9 +151,8 @@ export class FormUploadComp extends BaseComponent<
             formvalues,
             formValues.FileLeafRef
           );
-     
+
           await this.props.onclose();
-     
         } catch (error) {
           message.error(
             "Đã có lỗi xảy ra trong quá trình cập nhật tài liệu",
@@ -177,7 +175,7 @@ export class FormUploadComp extends BaseComponent<
           this.setState({
             loading: true,
           });
-        
+
           let fileCheck: FileCheck[] = await Promise.all(
             formvalues.FileUpload?.fileList.map(async (file: File) => {
               const exists = await sp.web
@@ -286,7 +284,7 @@ export class FormUploadComp extends BaseComponent<
         itemSave.extension = this.getExtension(nameFile);
 
         await sp.web.lists
-          .getByTitle("Chứng từ lưu tạm")
+          .getByTitle("ChungTuLuuTam")
           .items.getById(item.Id)
           .update(itemSave);
       } catch (error) {
@@ -313,7 +311,7 @@ export class FormUploadComp extends BaseComponent<
 
   async getChiNhanh() {
     let chinhanh = await chiNhanhService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     });
     this.setState({
       chinhanh,
@@ -322,7 +320,7 @@ export class FormUploadComp extends BaseComponent<
 
   async getDuAn() {
     let duAn = await duAnService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     });
 
     this.setState({
@@ -332,7 +330,7 @@ export class FormUploadComp extends BaseComponent<
 
   async getNhaCungCap() {
     let nhaCungCap = await nhaCungCapService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     });
 
     this.setState({
@@ -342,7 +340,7 @@ export class FormUploadComp extends BaseComponent<
 
   async getNhomChungTu() {
     let nhomChungTu = await nhomCTService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     });
     this.setState({
       nhomChungTu,
@@ -351,7 +349,7 @@ export class FormUploadComp extends BaseComponent<
 
   async getLoaiChungTuKeToan() {
     let loaiChungTuKeToan = await loaiCTKTService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     });
     this.setState({
       loaiChungTuKeToan,
@@ -360,7 +358,7 @@ export class FormUploadComp extends BaseComponent<
 
   async getLoaiChungTu() {
     let loaiChungTu = await loaiCTService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     });
     this.setState({
       loaiChungTu,
@@ -369,7 +367,7 @@ export class FormUploadComp extends BaseComponent<
 
   async getMaCK() {
     let maCK = await maCKService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     });
     this.setState({
       maCK,
@@ -378,7 +376,7 @@ export class FormUploadComp extends BaseComponent<
 
   async getTKNH() {
     let tKNH = await tKNHService.getAll({
-      filter: "TrangThai ne 0",
+      filter: "TrangThai ne 1",
     });
     this.setState({
       tKNH,
@@ -424,33 +422,33 @@ export class FormUploadComp extends BaseComponent<
     return (
       <Spin spinning={this.state.loading}>
         <div className={styles.searchDocuments__searchForm}>
-          {formValues&&(
+          {formValues && (
             <div
-            className={styles.searchDocuments__fileonlyView}
-            onClick={() => {
-              window.open(
-                `${
-                  this.props.context.pageContext.web.absoluteUrl
-                }/_layouts/15/wopiframe.aspx?sourcedoc=${
-                  formValues.UniqueId
-                }&action=${"view"}`,
-                "_blank"
-              );
-            }}
-          >
-            {this.getIcon(formValues?.Title) ? (
-              <img
-                className={styles.searchDocuments__fileonlyView__icon}
-                src={this.getIcon(formValues?.Title)}
-              />
-            ) : (
-              <Icon
-                className={styles.searchDocuments__fileonlyView__icon}
-                type="file"
-              />
-            )}
-            {formValues?.Title}
-          </div>
+              className={styles.searchDocuments__fileonlyView}
+              onClick={() => {
+                window.open(
+                  `${
+                    this.props.context.pageContext.web.absoluteUrl
+                  }/_layouts/15/wopiframe.aspx?sourcedoc=${
+                    formValues.UniqueId
+                  }&action=${"view"}`,
+                  "_blank"
+                );
+              }}
+            >
+              {this.getIcon(formValues?.Title) ? (
+                <img
+                  className={styles.searchDocuments__fileonlyView__icon}
+                  src={this.getIcon(formValues?.Title)}
+                />
+              ) : (
+                <Icon
+                  className={styles.searchDocuments__fileonlyView__icon}
+                  type="file"
+                />
+              )}
+              {formValues?.Title}
+            </div>
           )}
           <Form
             labelAlign={"left"}
@@ -486,7 +484,6 @@ export class FormUploadComp extends BaseComponent<
                       )}
                     </Form.Item>
                   </Col>
-          
                 </Row>
               )}
 
@@ -554,7 +551,7 @@ export class FormUploadComp extends BaseComponent<
                       "BoPhanThucHienId",
                       {}
                     )(
-                      <div >
+                      <div style={{ marginTop: -23 }}>
                         <PeoplePicker
                           ref={this.peoplePickerRef}
                           key={"id"}
@@ -564,7 +561,6 @@ export class FormUploadComp extends BaseComponent<
                           disabled={false}
                           onChange={(items: any[]) => {
                             if (items?.length > 0) {
-                            
                               this.setState({
                                 BoPhanThucHienId: parseInt(items[0].id),
                               });
@@ -617,7 +613,7 @@ export class FormUploadComp extends BaseComponent<
             >
               <Row>
                 <Col span={24}>
-                  {" "}
+               
                   <Form.Item label="Nhóm chứng từ">
                     {getFieldDecorator(
                       "NhomChungTuId",
@@ -635,7 +631,7 @@ export class FormUploadComp extends BaseComponent<
                             value={item.Id}
                             key={item.Id.toString()}
                           >
-                            {item.NhomChungTu}
+                            {item.TenNhomChungTu}
                           </Select.Option>
                         ))}
                       </Select>

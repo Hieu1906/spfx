@@ -298,12 +298,12 @@ export default class SideNav extends BaseComponent<
     console.log(urlSplitted);
     if (valueSearch.length > 0) {
       window.open(
-        `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt/SitePages/Search.aspx?keyword=${this.state.valueSearch}&year=${urlSplitted[8]}`,
+        `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt/SitePages/Search.aspx?keyword=${this.state.valueSearch}&baseUrl=${this.props.context.pageContext.web.absoluteUrl}`,
         "_self"
       );
     } else {
       window.open(
-        `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt/SitePages/Search.aspx?year=${urlSplitted[8]}`,
+        `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt/SitePages/Search.aspx?baseUrl=${this.props.context.pageContext.web.absoluteUrl}`,
         "_self"
       );
     }
@@ -336,6 +336,7 @@ export default class SideNav extends BaseComponent<
               }
             />
             <div
+            style={{marginTop:5}}
               className={
                 styles.navigationTree__container__tree__search__wrapperSearchInput__buttons
               }
