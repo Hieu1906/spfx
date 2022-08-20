@@ -151,7 +151,7 @@ export class FormUploadComp extends BaseComponent<
             formvalues,
             formValues.FileLeafRef
           );
-
+          window.location.reload();
           await this.props.onclose();
         } catch (error) {
           message.error(
@@ -461,7 +461,7 @@ export class FormUploadComp extends BaseComponent<
               }
             >
               {!formValues && (
-                <Row>
+                <Row gutter={16}>
                   <Col span={12}>
                     <Form.Item
                       wrapperCol={{ span: 16 }}
@@ -477,17 +477,44 @@ export class FormUploadComp extends BaseComponent<
                         ],
                       })(
                         <Upload multiple={true} style={{ width: "100%" }}>
-                          <Button>
+                          <Button style={{ width: "100%" }}>
                             <Icon type="upload" /> Tải chứng từ lưu tạm
                           </Button>
                         </Upload>
                       )}
                     </Form.Item>
                   </Col>
+                  {/* <Col span={12}>
+                    <Form.Item
+                      wrapperCol={{ span: 16 }}
+                      labelCol={{ span: 8 }}
+                      label="Trạng thái chứng từ"
+                    >
+                      {getFieldDecorator(
+                        "TrangThaiTrungTu",
+                        {}
+                      )(
+                        <Select allowClear>
+                          <Select.Option
+                            key={1}
+                            value={"Kế toán viên xác nhận"}
+                          >
+                            Kế toán viên xác nhận
+                          </Select.Option>
+                          <Select.Option
+                            key={2}
+                            value={"Kiểm soát viên xác nhận"}
+                          >
+                            Kiểm soát viên xác nhận
+                          </Select.Option>
+                        </Select>
+                      )}
+                    </Form.Item>
+                  </Col> */}
                 </Row>
               )}
 
-              <Row>
+              <Row gutter={16}>
                 <Col span={12}>
                   <Form.Item
                     wrapperCol={{ span: 16 }}
@@ -611,9 +638,8 @@ export class FormUploadComp extends BaseComponent<
                 styles.searchDocuments__searchForm__form__wrapperByGroup
               }
             >
-              <Row>
+              <Row gutter={16}>
                 <Col span={24}>
-               
                   <Form.Item label="Nhóm chứng từ">
                     {getFieldDecorator(
                       "NhomChungTuId",
@@ -699,7 +725,7 @@ export class FormUploadComp extends BaseComponent<
                 styles.searchDocuments__searchForm__form__wrapperByGroup
               }
             >
-              <Row>
+              <Row gutter={16}>
                 <Col span={24}>
                   {" "}
                   <Form.Item label="Loại chứng từ KT:">

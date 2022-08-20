@@ -415,7 +415,7 @@ export class FormSearchComp extends BaseComponent<
     this.peoplePickerRef!.current!.setState({
       selectedPersons: [],
     });
-    this.props.form.resetFields();
+    this.props.form.resetFields(fieldCanReset);
     this.props.form.setFieldsValue({ Year: moment().year() });
     this.getFormValue();
   }

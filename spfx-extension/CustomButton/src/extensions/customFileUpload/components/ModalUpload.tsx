@@ -37,7 +37,7 @@ export default class ModalUploadFile extends BaseComponent<
             ? "Chỉnh sửa chứng từ lưu tạm"
             : "Thêm mới chứng từ lưu tạm"
         }
-        width={900}
+        width={957}
         onCancel={async () => {
           await this.props.onClose();
         }}

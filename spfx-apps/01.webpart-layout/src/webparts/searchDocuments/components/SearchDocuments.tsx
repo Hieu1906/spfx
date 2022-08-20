@@ -457,7 +457,7 @@ export default class SearchDocuments extends BaseComponent<
       <div
         className={styles.searchDocuments}
         id="searchDocuments"
-        style={{ height: window.innerHeight - 270 }}
+        style={{ height: window.innerHeight - 250 }}
       >
         <FormSearch
           search={async (formvalues) => {
@@ -479,7 +479,7 @@ export default class SearchDocuments extends BaseComponent<
                 }}
                 rowKey={"ID"}
                 loading={this.state.loading}
-                scroll={{ x: "max-content", y: window.innerHeight - 395 }}
+                scroll={{ x: "max-content", y: window.innerHeight - 345 }}
                 columns={this.getColumn()}
                 dataSource={this.state.DataSource}
                 onChange={(
