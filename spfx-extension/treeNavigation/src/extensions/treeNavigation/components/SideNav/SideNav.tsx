@@ -9,6 +9,7 @@ import { ISideNavProps } from "./ISideNavProps";
 import { ISideNavState, ITreeItem } from "./ISideNavState";
 import styles from "./scss/SideNav.module.scss";
 import { sideNavController } from "./SideNav.controller";
+import * as _ from "lodash";
 
 const { TreeNode } = Tree;
 
@@ -294,19 +295,15 @@ export default class SideNav extends BaseComponent<
   }
 
   NavigateSearchWp(valueSearch?: string) {
-    let urlSplitted = window.location.href.match("^[^?]*")![0].split("/");
-    console.log(urlSplitted);
+    let url = `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt/SitePages/Search.aspx?baseUrl=${this.props.context.pageContext.web.absoluteUrl}`;
+    console.log(this.props.context);
     if (valueSearch.length > 0) {
-      window.open(
-        `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt/SitePages/Search.aspx?keyword=${this.state.valueSearch}&baseUrl=${this.props.context.pageContext.web.absoluteUrl}`,
-        "_self"
-      );
-    } else {
-      window.open(
-        `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt/SitePages/Search.aspx?baseUrl=${this.props.context.pageContext.web.absoluteUrl}`,
-        "_self"
-      );
+      url = url + `&keyword=${this.state.valueSearch}`;
     }
+    if (this.props.context.pageContext.list.title == "ChungTuLuuTam") {
+      url = url + `&filterBy=FolderChungTuLuuTam`;
+    }
+    window.open(url, "_self");
   }
   public render() {
     return (
@@ -336,7 +333,7 @@ export default class SideNav extends BaseComponent<
               }
             />
             <div
-            style={{marginTop:5}}
+              style={{ marginTop: 5 }}
               className={
                 styles.navigationTree__container__tree__search__wrapperSearchInput__buttons
               }

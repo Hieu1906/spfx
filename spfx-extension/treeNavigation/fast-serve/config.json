@@ -4,7 +4,7 @@
     "isLibraryComponent": false
   },
   "serve": {
-    "openUrl": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/khoctkt/ap-noi-bo/invoice/2022/ChungTuLuuTam/Forms/AllItems.aspx?debugManifestsFile=https%3A%2F%2Flocalhost%3A4321%2Ftemp%2Fmanifests.js&loadSPFX=true&customActions=%7B%224baf3468-072e-47bf-81c7-de508d313a0f%22%3A%7B%22location%22%3A%22ClientSideExtension.ApplicationCustomizer%22%2C%22properties%22%3A%7B%22testMessage%22%3A%22Test+message%22%7D%7D%7D",
+    "openUrl": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/khoctkt/ChungTuLuuTam/Forms/AllItems.aspx?debugManifestsFile=https%3A%2F%2Flocalhost%3A4321%2Ftemp%2Fmanifests.js&loadSPFX=true&customActions=%7B%224baf3468-072e-47bf-81c7-de508d313a0f%22%3A%7B%22location%22%3A%22ClientSideExtension.ApplicationCustomizer%22%2C%22properties%22%3A%7B%22testMessage%22%3A%22Test+message%22%7D%7D%7D",
     "fullScreenErrors": true
   }
 }

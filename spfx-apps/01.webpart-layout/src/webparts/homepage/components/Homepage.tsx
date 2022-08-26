@@ -26,7 +26,7 @@ export interface IHomepageStates {
   isModalVisible: boolean;
   parentSite: ITreeItem[];
   subSiteLevel1: ITreeItem[];
-  titleModal:string
+  titleModal: string;
 }
 
 export default class Homepage extends BaseComponent<
@@ -39,7 +39,7 @@ export default class Homepage extends BaseComponent<
       isModalVisible: false,
       parentSite: [],
       subSiteLevel1: [],
-      titleModal:""
+      titleModal: "",
     };
     this.onMount(async () => {
       await this.getParentSite();
@@ -49,6 +49,14 @@ export default class Homepage extends BaseComponent<
   public async getParentSite() {
     let parentSiteUrl = `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt`;
     let parentSite = await this.getSubSiteInCurrentSite(parentSiteUrl);
+    parentSite.unshift({
+      UniqueId: "",
+      RelativeUrl: `${this.props.context.pageContext.web.serverRelativeUrl}/ChungTuLuuTam`,
+      AbsoluteUrl: `${this.props.context.pageContext.web.absoluteUrl}/ChungTuLuuTam`,
+      Title: "Chứng từ lưu tạm",
+      TypeNode: "DocLib",
+      Created: moment(),
+    });
     this.setState({
       parentSite,
     });
@@ -88,7 +96,7 @@ export default class Homepage extends BaseComponent<
           width={752}
           className={styles.modal}
           footer={null}
-          title={this.state.titleModal&&this.state.titleModal}
+          title={this.state.titleModal && this.state.titleModal}
           visible={this.state.isModalVisible}
           onCancel={() => {
             this.setState({
@@ -108,7 +116,18 @@ export default class Homepage extends BaseComponent<
     return (
       <Tabs>
         {items.map((item) => (
-          <TabPane tab={<span>{item.Title}</span>} key={item.UniqueId}>
+          <TabPane
+            tab={
+              <span
+                onClick={() => {
+                  window.open(`${item.AbsoluteUrl}`);
+                }}
+              >
+                {item.Title}
+              </span>
+            }
+            key={item.UniqueId}
+          >
             {this.renderItem(item)}
           </TabPane>
         ))}
@@ -118,7 +137,7 @@ export default class Homepage extends BaseComponent<
 
   renderItem(item: ITreeItem) {
     let arr = [];
-    for (let i = 2020; i <= moment().year(); i++) {
+    for (let i = 2022; i <= 2030; i++) {
       arr.push(i);
     }
     return (
@@ -126,9 +145,7 @@ export default class Homepage extends BaseComponent<
         {arr.map((year) => (
           <div
             onClick={() => {
-              window.open(
-                `${item.AbsoluteUrl}/${year}`
-              );
+              window.open(`${item.AbsoluteUrl}/${year}`);
             }}
             className={styles.modal__listItem__item}
           >
@@ -168,11 +185,15 @@ export default class Homepage extends BaseComponent<
                 <a
                   className={styles.drsContainer}
                   onClick={async () => {
-                    this.setState({
-                      isModalVisible: true,
-                      titleModal:item.Title
-                    });
-                    this.getItemInSubSiteLevel1(item);
+                    if (item.UniqueId) {
+                      this.setState({
+                        isModalVisible: true,
+                        titleModal: item.Title,
+                      });
+                      this.getItemInSubSiteLevel1(item);
+                    } else {
+                      window.open(`${item.AbsoluteUrl}`);
+                    }
                   }}
                 >
                   <Avatar title={item.Title} />

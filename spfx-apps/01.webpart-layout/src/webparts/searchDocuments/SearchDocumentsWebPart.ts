@@ -30,6 +30,8 @@ export default class SearchDocumentsWebPart extends BaseClientSideWebPart<ISearc
       "https://cdnjs.cloudflare.com/ajax/libs/antd/3.26.19/antd.css"
     );
     $('[data-sp-feature-tag="PageTitle"]').css("display", "none");
+    $('[data-sp-feature-tag="Site header host"]').css("display", "none");
+
     SPComponentLoader.loadCss(
       `${this.context.pageContext.site.absoluteUrl}/apps/rfa/adms/Shared%20Documents/hidenNavDefault.css`
     );

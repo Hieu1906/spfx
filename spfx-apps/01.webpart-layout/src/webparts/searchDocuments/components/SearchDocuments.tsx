@@ -78,7 +78,7 @@ export default class SearchDocuments extends BaseComponent<
     let wrapperElement = document.querySelector("#searchDocuments");
     if (wrapperElement) {
       this.setState({
-        withTable: wrapperElement.clientWidth - 450,
+        withTable: wrapperElement.clientWidth - 400,
       });
     }
   }
@@ -179,17 +179,17 @@ export default class SearchDocuments extends BaseComponent<
         `substringof('${trim(formvalues.RequestCode)}',RequestCode)`
       );
     }
+   
+    if (formvalues.BoPhanThucHienId) {
+      arrQuery.push(`BoPhanThucHienId eq ${formvalues?.BoPhanThucHienId}`);
+    }
     if (formvalues.NgayChungTuFrom) {
       const isoDate = formvalues.NgayChungTuFrom.startOf("date").toJSON();
       arrQuery.push(`NgayChungTu ge datetime'${isoDate}'`);
     }
-    if (formvalues.BoPhanThucHienId) {
-      arrQuery.push(`BoPhanThucHienId eq ${formvalues?.BoPhanThucHienId}`);
-    }
-
     if (formvalues.NgayChungTuTo) {
       const isoDate = formvalues.NgayChungTuTo.endOf("date").toJSON();
-      arrQuery.push(`NgayChungTuTo le datetime'${isoDate}'`);
+      arrQuery.push(`NgayChungTu le datetime'${isoDate}'`);
     }
     if (formvalues.NgayChungTuKTFrom) {
       const isoDate = formvalues.NgayChungTuKTFrom.startOf("date").toJSON();
@@ -210,17 +210,20 @@ export default class SearchDocuments extends BaseComponent<
     this.setState({ loading: true, isLoadData: true });
     let allFileFilter: any[];
     let query = this.buildQuery(formvalues);
+    let baseUrl = formvalues.Year
+      ? `${formvalues.SiteLoaiCT}/${formvalues.Year}`
+      : this.props.context.pageContext.web.absoluteUrl;
     try {
       allFileFilter = await this.getFilesInforByFolderPath(
         formvalues.Folder,
-        `${formvalues.SiteLoaiCT}/${formvalues.Year}`,
+        baseUrl,
         query
       );
 
       allFileFilter = allFileFilter.filter((item) => {
         return item.File?.Name;
       });
-     
+
       this.setState({
         DataSource: allFileFilter as any[],
       });
@@ -454,11 +457,7 @@ export default class SearchDocuments extends BaseComponent<
   public render(): React.ReactElement<ISearchDocumentsProps> {
     console.log(this.props.PageSize);
     return (
-      <div
-        className={styles.searchDocuments}
-        id="searchDocuments"
-        style={{ height: window.innerHeight - 250 }}
-      >
+      <div className={styles.searchDocuments} id="searchDocuments">
         <FormSearch
           search={async (formvalues) => {
             await this.handelSearch(formvalues);
@@ -479,7 +478,7 @@ export default class SearchDocuments extends BaseComponent<
                 }}
                 rowKey={"ID"}
                 loading={this.state.loading}
-                scroll={{ x: "max-content", y: window.innerHeight - 345 }}
+                scroll={{ x: "max-content", y: window.innerHeight - 270 }}
                 columns={this.getColumn()}
                 dataSource={this.state.DataSource}
                 onChange={(

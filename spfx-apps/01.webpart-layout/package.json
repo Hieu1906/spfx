@@ -30,7 +30,8 @@
     "ramda": "~0.28.0",
     "@pnp/spfx-controls-react": "v2",
     "uuid": "~8.3.2",
-    "typescript": "3.9.4"
+    "typescript": "3.9.4",
+    "jquery": "~3.5.1"
   },
   "devDependencies": {
     "@types/lodash": "~4.14.155",

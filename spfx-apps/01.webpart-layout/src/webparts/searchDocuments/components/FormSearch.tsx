@@ -8,7 +8,17 @@ import {
   PeoplePicker,
   PrincipalType,
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
-import { Button, DatePicker, Form, Input, message, Select, Spin } from "antd";
+import {
+  Button,
+  DatePicker,
+  Form,
+  Icon,
+  Input,
+  message,
+  Select,
+  Spin,
+  Tabs,
+} from "antd";
 import { FormComponentProps } from "antd/lib/form/Form";
 import * as moment from "moment";
 import { IPersonaProps } from "office-ui-fabric-react";
@@ -33,6 +43,7 @@ import { nhaCungCapService } from "../../common/services/nhaCungCapService";
 import { nhomCTService } from "../../common/services/nhomChungTuService";
 import { tKNHService } from "../../common/services/taiKhoanNganHangService";
 import styles from "./SearchDocuments.module.scss";
+const { TabPane } = Tabs;
 export interface ISiteInfor {
   TypeNode: "DocLib" | "Site" | "Folder";
   RelativeUrl: string;
@@ -61,15 +72,16 @@ interface FormSearchState {
   BoPhanThucHienId?: number;
   siteNhomCTs: ISiteInfor[];
   siteLoaiCTs: ISiteInfor[];
+  filterBy?: "FolderChungTuLuuTam" | "SiteNhomChungTu";
 }
 const formItemLayout = {
   labelCol: {
     xs: { span: 24 },
-    sm: { span: 7 },
+    sm: { span: 8 },
   },
   wrapperCol: {
     xs: { span: 24 },
-    sm: { span: 17 },
+    sm: { span: 16 },
   },
 };
 const years: number[] = [];
@@ -130,22 +142,40 @@ export class FormSearchComp extends BaseComponent<
       loading: false,
     };
     this.onMount(async () => {
-      this.setState({
-        loading: true,
+      await this.init();
+    });
+  }
+  async init() {
+    this.setState({
+      loading: true,
+    });
+    // gọi lần đầu để láy các subsite đầu tiên từ kho chứng từ
+
+    let filterBy = Global.Functions.getParameterByName("filterBy");
+    if (filterBy == "FolderChungTuLuuTam") {
+      await this.setState({
+        filterBy: "FolderChungTuLuuTam",
       });
-      await this.initSearch();
+      await this.loadMetaData();
+      this.getFormValue("FolderChungTuLuuTam");
+    } else {
+      await this.setState({
+        filterBy: "SiteNhomChungTu",
+      });
+      await this.getInforByParam();
       await this.loadMetaData(
         this.props.form.getFieldValue("Year"),
         this.props.form.getFieldValue("SiteLoaiCT")
       );
+      this.getFormValue("SiteNhomChungTu");
+    }
 
-      this.setState({
-        loading: false,
-      });
+    this.setState({
+      loading: false,
     });
   }
-
-  async initSearch() {
+  async getInforByParam() {
+    await this.getSiteNhomCTs();
     let keyword = Global.Functions.getParameterByName("keyword");
     let baseUrl = Global.Functions.getParameterByName("baseUrl");
     let urlSplitted = baseUrl.match("^[^?]*")![0].split("/");
@@ -153,10 +183,10 @@ export class FormSearchComp extends BaseComponent<
     let nhomCT_Url = urlSplitted[8]
       ? `${this.props.context.pageContext.web.absoluteUrl}/${urlSplitted[8]}`
       : undefined;
-    let loaiCT_Url = urlSplitted[8]
+    let loaiCT_Url = urlSplitted[9]
       ? `${this.props.context.pageContext.web.absoluteUrl}/${urlSplitted[8]}/${urlSplitted[9]}`
       : undefined;
-    await this.getSiteNhomCTs();
+
     if (nhomCT_Url) {
       this.props.form.setFieldsValue({
         SiteNhomCT: nhomCT_Url,
@@ -194,10 +224,9 @@ export class FormSearchComp extends BaseComponent<
         KeyWord: keyword,
       });
     }
-    this.getFormValue();
   }
 
-  getFormValue() {
+  getFormValue(filterBy: "FolderChungTuLuuTam" | "SiteNhomChungTu") {
     this.props.form.validateFields(async (err, formvalues) => {
       console.log(formvalues);
       if (!err) {
@@ -208,7 +237,9 @@ export class FormSearchComp extends BaseComponent<
           if (this.state.BoPhanThucHienId) {
             formvalues.BoPhanThucHienId = this.state.BoPhanThucHienId;
           }
-
+          if (filterBy == "FolderChungTuLuuTam") {
+            formvalues.Folder = "ChungTuLuuTam";
+          }
           await this.props.search(formvalues);
         } catch (e) {
           message.error("Đã có lỗi xảy ra", 3);
@@ -225,11 +256,16 @@ export class FormSearchComp extends BaseComponent<
   }
 
   public async getSiteNhomCTs() {
-    let parentSiteUrl = `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt`;
-    let siteNhomCTs = await this.getSubSiteInCurrentSite(parentSiteUrl);
-    this.setState({
-      siteNhomCTs,
-    });
+    try {
+      let parentSiteUrl = `${this.props.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt`;
+      let siteNhomCTs = await this.getSubSiteInCurrentSite(parentSiteUrl);
+      this.setState({
+        siteNhomCTs,
+      });
+    } catch (error) {
+      console.error("Đã có lỗi xảy ra tròn quá trình lấy subsite đầu tiên");
+      console.error(error);
+    }
   }
 
   public async getSiteLoaiCTs(absoluteUrl: string) {
@@ -257,7 +293,7 @@ export class FormSearchComp extends BaseComponent<
     return treeItem || [];
   }
 
-  async loadMetaData(year: number, absoluteUrl: string) {
+  async loadMetaData(year?: number, absoluteUrl?: string) {
     this.setState({
       loading: true,
     });
@@ -282,9 +318,11 @@ export class FormSearchComp extends BaseComponent<
     }
   }
 
-  async getChiNhanh(year: number, absoluteUrl: string) {
+  async getChiNhanh(year: number, absoluteUrl?: string) {
     try {
-      chiNhanhService.site = `${absoluteUrl}/${year}`;
+      if (absoluteUrl) {
+        chiNhanhService.site = `${absoluteUrl}/${year}`;
+      }
       let chinhanh = await chiNhanhService.getAll({
         filter: "TrangThai ne 1",
       });
@@ -298,8 +336,11 @@ export class FormSearchComp extends BaseComponent<
     }
   }
 
-  async getDuAn(year: number, absoluteUrl: string) {
-    duAnService.site = `${absoluteUrl}/${year}`;
+  async getDuAn(year: number, absoluteUrl?: string) {
+    if (absoluteUrl) {
+      duAnService.site = `${absoluteUrl}/${year}`;
+    }
+
     let duAn = await duAnService.getAll({
       filter: "TrangThai ne 1",
     });
@@ -309,9 +350,11 @@ export class FormSearchComp extends BaseComponent<
     });
   }
 
-  async getNhaCungCap(year: number, absoluteUrl: string) {
+  async getNhaCungCap(year: number, absoluteUrl?: string) {
     try {
-      nhaCungCapService.site = `${absoluteUrl}/${year}`;
+      if (absoluteUrl) {
+        nhaCungCapService.site = `${absoluteUrl}/${year}`;
+      }
       let nhaCungCap = await nhaCungCapService.getAll({
         filter: "TrangThai ne 1",
       });
@@ -326,9 +369,12 @@ export class FormSearchComp extends BaseComponent<
     }
   }
 
-  async getLoaiChungTuKeToan(year: number, absoluteUrl: string) {
+  async getLoaiChungTuKeToan(year: number, absoluteUrl?: string) {
     try {
-      loaiCTKTService.site = `${absoluteUrl}/${year}`;
+      if (absoluteUrl) {
+        loaiCTKTService.site = `${absoluteUrl}/${year}`;
+      }
+
       let loaiChungTuKeToan = await loaiCTKTService.getAll({
         filter: "TrangThai ne 1",
       });
@@ -343,9 +389,12 @@ export class FormSearchComp extends BaseComponent<
     }
   }
 
-  async getMaCK(year: number, absoluteUrl: string) {
+  async getMaCK(year: number, absoluteUrl?: string) {
     try {
-      maCKService.site = `${absoluteUrl}/${year}`;
+      if (absoluteUrl) {
+        maCKService.site = `${absoluteUrl}/${year}`;
+      }
+
       let maCK = await maCKService.getAll({
         filter: "TrangThai ne 1",
       });
@@ -359,9 +408,12 @@ export class FormSearchComp extends BaseComponent<
     }
   }
 
-  async getTKNH(year: number, absoluteUrl: string) {
+  async getTKNH(year: number, absoluteUrl?: string) {
     try {
-      tKNHService.site = `${absoluteUrl}/${year}`;
+      if (absoluteUrl) {
+        tKNHService.site = `${absoluteUrl}/${year}`;
+      }
+
       let tKNH = await tKNHService.getAll({
         filter: "TrangThai ne 1",
       });
@@ -375,9 +427,12 @@ export class FormSearchComp extends BaseComponent<
     }
   }
 
-  async getNhomChungTu(year: number, absoluteUrl: string) {
+  async getNhomChungTu(year: number, absoluteUrl?: string) {
     try {
-      nhomCTService.site = `${absoluteUrl}/${year}`;
+      if (absoluteUrl) {
+        nhomCTService.site = `${absoluteUrl}/${year}`;
+      }
+
       let nhomChungTu = await nhomCTService.getAll({
         filter: "TrangThai ne 1",
       });
@@ -392,9 +447,12 @@ export class FormSearchComp extends BaseComponent<
     }
   }
 
-  async getLoaiChungTu(year: number, absoluteUrl: string) {
+  async getLoaiChungTu(year: number, absoluteUrl?: string) {
     try {
-      loaiCTService.site = `${absoluteUrl}/${year}`;
+      if (absoluteUrl) {
+        loaiCTService.site = `${absoluteUrl}/${year}`;
+      }
+
       let loaiChungTu = await loaiCTService.getAll({
         filter: "TrangThai ne 1",
       });
@@ -417,144 +475,115 @@ export class FormSearchComp extends BaseComponent<
     });
     this.props.form.resetFields(fieldCanReset);
     this.props.form.setFieldsValue({ Year: moment().year() });
-    this.getFormValue();
+    this.getFormValue(this.state.filterBy);
   }
 
-  public render(): React.ReactElement<FormSearchProps> {
-    const { getFieldDecorator } = this.props.form;
-
+  renderFormItem(
+    getFieldDecorator: any,
+    filterBy: "FolderChungTuLuuTam" | "SiteNhomChungTu"
+  ) {
     return (
-      <Spin spinning={this.state.loading}>
-        <div
-          className={styles.searchDocuments__searchForm}
-          style={{ height: window.innerHeight - 270 }}
-        >
-          <Form
-            labelAlign={"left"}
-            {...formItemLayout}
-            className={styles.searchDocuments__searchForm__form}
+      <div className={styles.searchDocuments__searchForm__form}>
+        {filterBy == "SiteNhomChungTu" && (
+          <div
+            className={styles.searchDocuments__searchForm__form__wrapperByGroup}
           >
-            <Form.Item
-              className={styles.searchDocuments__searchForm__form__input}
-            >
+            <Form.Item label="Site nhóm chứng từ">
               {getFieldDecorator(
-                "KeyWord",
+                "SiteNhomCT",
                 {}
               )(
-                <Input
-                  style={{ width: "100%" }}
-                  placeholder="Nhập từ khóa để tìm kiếm chứng từ"
-                />
+                <Select
+                  onSelect={async (value) => {
+                    this.props.form.resetFields(fieldCanReset);
+                    this.props.form.resetFields(["SiteLoaiCT", "Year"]);
+                    await this.getSiteLoaiCTs(value as string);
+                    await this.loadMetaData(
+                      moment().year(),
+                      this.state.siteLoaiCTs[0].AbsoluteUrl
+                    );
+                    this.props.form.setFieldsValue({
+                      SiteLoaiCT: this.state.siteLoaiCTs[0].AbsoluteUrl,
+                    });
+                  }}
+                >
+                  {this.state.siteNhomCTs.map((item) => (
+                    <Select.Option key={item.UniqueId} value={item.AbsoluteUrl}>
+                      {item.Title}
+                    </Select.Option>
+                  ))}
+                </Select>
               )}
             </Form.Item>
-            <div
-              className={
-                styles.searchDocuments__searchForm__form__wrapperByGroup
-              }
-            >
-              <Form.Item label="Site nhóm chứng từ">
-                {getFieldDecorator(
-                  "SiteNhomCT",
-                  {}
-                )(
-                  <Select
-                    onSelect={async (value) => {
-                      this.props.form.resetFields(fieldCanReset);
-                      this.props.form.resetFields(["SiteLoaiCT", "Year"]);
-                      await this.getSiteLoaiCTs(value as string);
-                      await this.loadMetaData(
-                        moment().year(),
-                        this.state.siteLoaiCTs[0].AbsoluteUrl
-                      );
-                      this.props.form.setFieldsValue({
-                        SiteLoaiCT: this.state.siteLoaiCTs[0].AbsoluteUrl,
-                      });
-                    }}
-                  >
-                    {this.state.siteNhomCTs.map((item) => (
-                      <Select.Option
-                        key={item.UniqueId}
-                        value={item.AbsoluteUrl}
-                      >
-                        {item.Title}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                )}
-              </Form.Item>
-              <Form.Item label="Site loại chứng từ">
-                {getFieldDecorator(
-                  "SiteLoaiCT",
-                  {}
-                )(
-                  <Select
-                    showSearch
-                    onSelect={async (value) => {
-                      this.props.form.resetFields(fieldCanReset);
-                      this.props.form.resetFields(["Year"]);
-                      await this.loadMetaData(moment().year(), value as string);
-                    }}
-                  >
-                    {this.state.siteLoaiCTs.map((item) => (
-                      <Select.Option
-                        key={item.UniqueId}
-                        value={item.AbsoluteUrl}
-                      >
-                        {item.Title}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                )}
-              </Form.Item>
-              <Form.Item label="Năm">
-                {getFieldDecorator("Year", {
-                  initialValue: this.state.yearSelected,
-                })(
-                  <Select
-                    showSearch
-                    onSelect={async (value: any) => {
-                      this.props.form.resetFields(fieldCanReset);
-                      await this.loadMetaData(
-                        value,
-                        this.props.form.getFieldValue("SiteLoaiCT")
-                      );
-                    }}
-                  >
-                    {years.map((item) => (
-                      <Select.Option key={item.toString()} value={item}>
-                        {item.toString()}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                )}
-              </Form.Item>
-              <Form.Item label="Thư mục ">
-                {getFieldDecorator("Folder", {
-                  initialValue: "ChungTuLuuTam",
-                })(
-                  <Select
-                    showSearch
-                    onSelect={async (value: any) => {
-                      this.props.form.resetFields(fieldCanReset);
-                    }}
-                  >
-                    <Select.Option key={100} value={"ChungTuLuuTam"}>
-                      Chứng từ lưu tạm
+            <Form.Item label="Site loại chứng từ">
+              {getFieldDecorator(
+                "SiteLoaiCT",
+                {}
+              )(
+                <Select
+                  showSearch
+                  onSelect={async (value) => {
+                    this.props.form.resetFields(fieldCanReset);
+                    this.props.form.resetFields(["Year"]);
+                    await this.loadMetaData(moment().year(), value as string);
+                  }}
+                >
+                  {this.state.siteLoaiCTs.map((item) => (
+                    <Select.Option key={item.UniqueId} value={item.AbsoluteUrl}>
+                      {item.Title}
                     </Select.Option>
-                    {arrMonth.map((item) => (
-                      <Select.Option key={item.toString()} value={item}>
-                        Tháng {item.toString()}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                )}
-              </Form.Item>
-            </div>
-            <div
-              className={
-                styles.searchDocuments__searchForm__form__wrapperByGroup
-              }
-            >
+                  ))}
+                </Select>
+              )}
+            </Form.Item>
+            <Form.Item label="Năm">
+              {getFieldDecorator("Year", {
+                initialValue: this.state.yearSelected,
+              })(
+                <Select
+                  showSearch
+                  onSelect={async (value: any) => {
+                    this.props.form.resetFields(fieldCanReset);
+                    await this.loadMetaData(
+                      value,
+                      this.props.form.getFieldValue("SiteLoaiCT")
+                    );
+                  }}
+                >
+                  {years.map((item) => (
+                    <Select.Option key={item.toString()} value={item}>
+                      {item.toString()}
+                    </Select.Option>
+                  ))}
+                </Select>
+              )}
+            </Form.Item>
+            <Form.Item label="Tháng">
+              {getFieldDecorator("Folder", {
+                initialValue: arrMonth[moment().month()],
+              })(
+                <Select
+                  showSearch
+                  onSelect={async (value: any) => {
+                    this.props.form.resetFields(fieldCanReset);
+                  }}
+                >
+                  {arrMonth.map((item) => (
+                    <Select.Option key={item.toString()} value={item}>
+                      Tháng {item.toString()}
+                    </Select.Option>
+                  ))}
+                </Select>
+              )}
+            </Form.Item>
+          </div>
+        )}
+
+        <div
+          className={styles.searchDocuments__searchForm__form__wrapperByGroup}
+        >
+          {filterBy == "FolderChungTuLuuTam" && (
+            <>
               <Form.Item label="Nhóm chứng từ">
                 {getFieldDecorator(
                   "NhomChungTuId",
@@ -591,327 +620,392 @@ export class FormSearchComp extends BaseComponent<
                   </Select>
                 )}
               </Form.Item>
-              <Form.Item label="Chi nhánh">
-                {getFieldDecorator(
-                  "ChiNhanhId",
-                  {}
-                )(
-                  <Select
-                    showSearch
-                    allowClear
-                    disabled={this.state.chinhanh?.length > 0 ? false : true}
-                  >
-                    {this.state.chinhanh?.map((item) => (
-                      <Select.Option key={item.Id} value={item.Id}>
-                        {item.TenChiNhanh}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                )}
-              </Form.Item>
-              <Form.Item label="Dự án">
-                {getFieldDecorator(
-                  "DuAnId",
-                  {}
-                )(
-                  <Select
-                    showSearch
-                    allowClear
-                    disabled={this.state.duAn?.length > 0 ? false : true}
-                  >
-                    {this.state.duAn?.map((item) => (
-                      <Select.Option value={item.Id} key={item.Id.toString()}>
-                        {item.TenDuAn}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                )}
-              </Form.Item>
-              <Form.Item label="Bộ phận">
-                {getFieldDecorator(
-                  "BoPhanThucHienId",
-                  {}
-                )(
-                  <PeoplePicker
-                    ref={this.peoplePickerRef}
-                    key={"id"}
-                    context={this.props.context}
-                    personSelectionLimit={1}
-                    showtooltip={false}
-                    disabled={false}
-                    onChange={(items: IPersonaProps[]) => {
-                      if (items?.length > 0) {
-                        console.log(items);
-                        this.setState({
-                          BoPhanThucHienId: parseInt(items[0].id),
-                        });
-                      }
-                    }}
-                    showHiddenInUI={true}
-                    principalTypes={[PrincipalType.SharePointGroup]}
-                    resolveDelay={500}
-                  />
-                )}
-              </Form.Item>
-              <Form.Item label="Nhà cung cấp">
-                {getFieldDecorator(
-                  "NhaCungCapId",
-                  {}
-                )(
-                  <Select
-                    showSearch
-                    allowClear
-                    disabled={this.state.nhaCungCap?.length > 0 ? false : true}
-                  >
-                    {this.state.nhaCungCap?.map((item) => (
-                      <Select.Option value={item.Id} key={item.Id.toString()}>
-                        {item.TenNCC}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                )}
-              </Form.Item>
-              <Form.Item label="Số chứng từ:">
-                {getFieldDecorator("SoChungTu", {})(<Input />)}
-              </Form.Item>
-              <Form.Item label={"Ngày chứng từ:"} style={{ paddingBottom: 0 }}>
-                <Form.Item
-                  style={{ display: "inline-block", width: "calc(50% - 12px)" }}
-                >
-                  {getFieldDecorator("NgayChungTuFrom", {
-                    rules: [],
-                  })(
-                    <DatePicker
-                      format="DD/MM/YYYY"
-                      placeholder={"Từ ngày:"}
-                      style={{ width: `100%` }}
-                      disabledDate={(NgayChungTuFrom) => {
-                        let dateInCalendar = NgayChungTuFrom?.startOf("day");
-                        const NgayChungTuTo: moment.Moment =
-                          this.props.form.getFieldValue("NgayChungTuTo");
-                        if (NgayChungTuTo) {
-                          let selectedEndDate = NgayChungTuTo.startOf("day");
-                          return !!(
-                            selectedEndDate &&
-                            dateInCalendar &&
-                            dateInCalendar > selectedEndDate
-                          );
-                        } else {
-                          return false;
-                        }
-                      }}
-                    />
-                  )}
-                </Form.Item>
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "24px",
-                    textAlign: "center",
-                  }}
-                >
-                  -
-                </span>
-                <Form.Item
-                  style={{ display: "inline-block", width: "calc(50% - 12px)" }}
-                >
-                  {getFieldDecorator("NgayChungTuTo", {
-                    rules: [],
-                  })(
-                    <DatePicker
-                      format="DD/MM/YYYY"
-                      placeholder={"Đến ngày:"}
-                      style={{ width: `100%` }}
-                      disabledDate={(NgayChungTuTo) => {
-                        let dateInCalendar = NgayChungTuTo?.startOf("day");
-                        const NgayChungTuFrom: moment.Moment =
-                          this.props.form.getFieldValue("NgayChungTuFrom");
-                        if (NgayChungTuFrom) {
-                          let selectedEndDate = NgayChungTuFrom.startOf("day");
-                          return !!(
-                            selectedEndDate &&
-                            dateInCalendar &&
-                            dateInCalendar < selectedEndDate
-                          );
-                        } else {
-                          return false;
-                        }
-                      }}
-                    />
-                  )}
-                </Form.Item>
-              </Form.Item>
-            </div>
-            <div
-              className={
-                styles.searchDocuments__searchForm__form__wrapperByGroup
-              }
-            >
-              <Form.Item label="Loại chứng từ KT:">
-                {getFieldDecorator(
-                  "LoaiChungTuKeToanId",
-                  {}
-                )(
-                  <Select
-                    showSearch
-                    allowClear
-                    disabled={
-                      this.state.loaiChungTuKeToan?.length > 0 ? false : true
-                    }
-                  >
-                    {this.state.loaiChungTuKeToan?.map((item) => (
-                      <Select.Option value={item.Id} key={item.Id.toString()}>
-                        {item.TenLoaiChungTuKeToan}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                )}
-              </Form.Item>
-
-              <Form.Item
-                label={"Ngày chứng từ KT:"}
-                style={{ paddingBottom: 0 }}
+            </>
+          )}
+          <Form.Item label="Chi nhánh">
+            {getFieldDecorator(
+              "ChiNhanhId",
+              {}
+            )(
+              <Select
+                showSearch
+                allowClear
+                disabled={this.state.chinhanh?.length > 0 ? false : true}
               >
-                <Form.Item
-                  style={{ display: "inline-block", width: "calc(50% - 12px)" }}
-                >
-                  {getFieldDecorator("NgayChungTuKTFrom", {
-                    rules: [],
-                  })(
-                    <DatePicker
-                      format="DD/MM/YYYY"
-                      placeholder={"Từ ngày:"}
-                      style={{ width: `100%` }}
-                      disabledDate={(NgayChungTuKTFrom) => {
-                        let dateInCalendar = NgayChungTuKTFrom?.startOf("day");
-                        const NgayChungTuKTTo: moment.Moment =
-                          this.props.form.getFieldValue("NgayChungTuKTTo");
-                        if (NgayChungTuKTTo) {
-                          let selectedEndDate = NgayChungTuKTTo.startOf("day");
-                          return !!(
-                            selectedEndDate &&
-                            dateInCalendar &&
-                            dateInCalendar > selectedEndDate
-                          );
-                        } else {
-                          return false;
-                        }
-                      }}
-                    />
-                  )}
-                </Form.Item>
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "24px",
-                    textAlign: "center",
+                {this.state.chinhanh?.map((item) => (
+                  <Select.Option key={item.Id} value={item.Id}>
+                    {item.TenChiNhanh}
+                  </Select.Option>
+                ))}
+              </Select>
+            )}
+          </Form.Item>
+          <Form.Item label="Dự án">
+            {getFieldDecorator(
+              "DuAnId",
+              {}
+            )(
+              <Select
+                showSearch
+                allowClear
+                disabled={this.state.duAn?.length > 0 ? false : true}
+              >
+                {this.state.duAn?.map((item) => (
+                  <Select.Option value={item.Id} key={item.Id.toString()}>
+                    {item.TenDuAn}
+                  </Select.Option>
+                ))}
+              </Select>
+            )}
+          </Form.Item>
+          <Form.Item label="Bộ phận">
+            {getFieldDecorator(
+              "BoPhanThucHienId",
+              {}
+            )(
+              <PeoplePicker
+                ref={this.peoplePickerRef}
+                key={"id"}
+                context={this.props.context}
+                personSelectionLimit={1}
+                showtooltip={false}
+                disabled={false}
+                onChange={(items: IPersonaProps[]) => {
+                  if (items?.length > 0) {
+                    console.log(items);
+                    this.setState({
+                      BoPhanThucHienId: parseInt(items[0].id),
+                    });
+                  }
+                }}
+                showHiddenInUI={true}
+                principalTypes={[PrincipalType.SharePointGroup]}
+                resolveDelay={500}
+              />
+            )}
+          </Form.Item>
+          <Form.Item label="Nhà cung cấp">
+            {getFieldDecorator(
+              "NhaCungCapId",
+              {}
+            )(
+              <Select
+                showSearch
+                allowClear
+                disabled={this.state.nhaCungCap?.length > 0 ? false : true}
+              >
+                {this.state.nhaCungCap?.map((item) => (
+                  <Select.Option value={item.Id} key={item.Id.toString()}>
+                    {item.TenNCC}
+                  </Select.Option>
+                ))}
+              </Select>
+            )}
+          </Form.Item>
+          <Form.Item label="Số chứng từ:">
+            {getFieldDecorator("SoChungTu", {})(<Input />)}
+          </Form.Item>
+          <Form.Item label={"Ngày chứng từ:"} style={{ paddingBottom: 0 }}>
+            <Form.Item
+              style={{ display: "inline-block", width: "calc(50% - 12px)" }}
+            >
+              {getFieldDecorator("NgayChungTuFrom", {
+                rules: [],
+              })(
+                <DatePicker
+                  format="DD/MM/YYYY"
+                  placeholder={"Từ ngày:"}
+                  style={{ width: `100%` }}
+                  disabledDate={(NgayChungTuFrom) => {
+                    let dateInCalendar = NgayChungTuFrom?.startOf("day");
+                    const NgayChungTuTo: moment.Moment =
+                      this.props.form.getFieldValue("NgayChungTuTo");
+                    if (NgayChungTuTo) {
+                      let selectedEndDate = NgayChungTuTo.startOf("day");
+                      return !!(
+                        selectedEndDate &&
+                        dateInCalendar &&
+                        dateInCalendar > selectedEndDate
+                      );
+                    } else {
+                      return false;
+                    }
                   }}
-                >
-                  -
+                />
+              )}
+            </Form.Item>
+            <span
+              style={{
+                display: "inline-block",
+                width: "24px",
+                textAlign: "center",
+              }}
+            >
+              -
+            </span>
+            <Form.Item
+              style={{ display: "inline-block", width: "calc(50% - 12px)" }}
+            >
+              {getFieldDecorator("NgayChungTuTo", {
+                rules: [],
+              })(
+                <DatePicker
+                  format="DD/MM/YYYY"
+                  placeholder={"Đến ngày:"}
+                  style={{ width: `100%` }}
+                  disabledDate={(NgayChungTuTo) => {
+                    let dateInCalendar = NgayChungTuTo?.startOf("day");
+                    const NgayChungTuFrom: moment.Moment =
+                      this.props.form.getFieldValue("NgayChungTuFrom");
+                    if (NgayChungTuFrom) {
+                      let selectedEndDate = NgayChungTuFrom.startOf("day");
+                      return !!(
+                        selectedEndDate &&
+                        dateInCalendar &&
+                        dateInCalendar < selectedEndDate
+                      );
+                    } else {
+                      return false;
+                    }
+                  }}
+                />
+              )}
+            </Form.Item>
+          </Form.Item>
+        </div>
+        <div
+          className={styles.searchDocuments__searchForm__form__wrapperByGroup}
+        >
+          <Form.Item label="Loại chứng từ KT:">
+            {getFieldDecorator(
+              "LoaiChungTuKeToanId",
+              {}
+            )(
+              <Select
+                showSearch
+                allowClear
+                disabled={
+                  this.state.loaiChungTuKeToan?.length > 0 ? false : true
+                }
+              >
+                {this.state.loaiChungTuKeToan?.map((item) => (
+                  <Select.Option value={item.Id} key={item.Id.toString()}>
+                    {item.TenLoaiChungTuKeToan}
+                  </Select.Option>
+                ))}
+              </Select>
+            )}
+          </Form.Item>
+
+          <Form.Item label={"Ngày chứng từ KT:"} style={{ paddingBottom: 0 }}>
+            <Form.Item
+              style={{ display: "inline-block", width: "calc(50% - 12px)" }}
+            >
+              {getFieldDecorator("NgayChungTuKTFrom", {
+                rules: [],
+              })(
+                <DatePicker
+                  format="DD/MM/YYYY"
+                  placeholder={"Từ ngày:"}
+                  style={{ width: `100%` }}
+                  disabledDate={(NgayChungTuKTFrom) => {
+                    let dateInCalendar = NgayChungTuKTFrom?.startOf("day");
+                    const NgayChungTuKTTo: moment.Moment =
+                      this.props.form.getFieldValue("NgayChungTuKTTo");
+                    if (NgayChungTuKTTo) {
+                      let selectedEndDate = NgayChungTuKTTo.startOf("day");
+                      return !!(
+                        selectedEndDate &&
+                        dateInCalendar &&
+                        dateInCalendar > selectedEndDate
+                      );
+                    } else {
+                      return false;
+                    }
+                  }}
+                />
+              )}
+            </Form.Item>
+            <span
+              style={{
+                display: "inline-block",
+                width: "24px",
+                textAlign: "center",
+              }}
+            >
+              -
+            </span>
+            <Form.Item
+              style={{ display: "inline-block", width: "calc(50% - 12px)" }}
+            >
+              {getFieldDecorator("NgayChungTuKTTo", {
+                rules: [],
+              })(
+                <DatePicker
+                  format="DD/MM/YYYY"
+                  placeholder={"Đến ngày:"}
+                  style={{ width: `100%` }}
+                  disabledDate={(NgayChungTuKTTo) => {
+                    let dateInCalendar = NgayChungTuKTTo?.startOf("day");
+                    const NgayChungTuKTFrom: moment.Moment =
+                      this.props.form.getFieldValue("NgayChungTuKTFrom");
+                    if (NgayChungTuKTFrom) {
+                      let selectedEndDate = NgayChungTuKTFrom.startOf("day");
+                      return !!(
+                        selectedEndDate &&
+                        dateInCalendar &&
+                        dateInCalendar < selectedEndDate
+                      );
+                    } else {
+                      return false;
+                    }
+                  }}
+                />
+              )}
+            </Form.Item>
+          </Form.Item>
+          <Form.Item label="Số chứng từ KT:">
+            {getFieldDecorator("SoChungTuKeToan", {})(<Input />)}
+          </Form.Item>
+        </div>
+        <div
+          className={styles.searchDocuments__searchForm__form__wrapperByGroup}
+        >
+          <Form.Item label="Mã chứng khoán:">
+            {getFieldDecorator(
+              "MaChungKhoanId",
+              {}
+            )(
+              <Select
+                showSearch
+                allowClear
+                disabled={this.state.maCK?.length > 0 ? false : true}
+              >
+                {this.state.maCK?.map((item) => (
+                  <Select.Option value={item.Id} key={item.Id.toString()}>
+                    {item.MaChungKhoan}
+                  </Select.Option>
+                ))}
+              </Select>
+            )}
+          </Form.Item>
+          <Form.Item label="Mã phiếu yêu cầu:">
+            {getFieldDecorator("RequestCode", {})(<Input />)}
+          </Form.Item>
+          <Form.Item label="TK ngân hàng:">
+            {getFieldDecorator(
+              "TaiKhoanNganHangId",
+              {}
+            )(
+              <Select
+                showSearch
+                allowClear
+                disabled={this.state.tKNH?.length > 0 ? false : true}
+              >
+                {this.state.tKNH?.map((item) => (
+                  <Select.Option value={item.Id} key={item.Id.toString()}>
+                    {item.SoTaiKhoan}
+                  </Select.Option>
+                ))}
+              </Select>
+            )}
+          </Form.Item>
+        </div>
+      </div>
+    );
+  }
+
+  async onTabClick(key: "FolderChungTuLuuTam" | "SiteNhomChungTu") {
+    this.setState({
+      filterBy: key,
+    });
+    if (key == "FolderChungTuLuuTam") {
+      await this.loadMetaData();
+      this.getFormValue(this.state.filterBy);
+     
+    } else {
+
+      await this.getInforByParam();
+      await this.loadMetaData(
+        this.props.form.getFieldValue("Year"),
+        this.props.form.getFieldValue("SiteLoaiCT")
+      );
+    }
+    this.props.form.resetFields(fieldCanReset)
+  }
+
+  public render(): React.ReactElement<FormSearchProps> {
+    const { getFieldDecorator } = this.props.form;
+
+    return (
+      <Spin spinning={this.state.loading}>
+        <Form labelAlign={"left"} {...formItemLayout}>
+          <Form.Item className={styles.input}>
+            {getFieldDecorator(
+              "KeyWord",
+              {}
+            )(
+              <Input
+                style={{ width: "100%" }}
+                placeholder="Nhập từ khóa để tìm kiếm chứng từ"
+              />
+            )}
+          </Form.Item>
+          <Tabs
+            onTabClick={async (
+              key: "FolderChungTuLuuTam" | "SiteNhomChungTu",
+              event: MouseEvent
+            ) => {
+              await this.onTabClick(key);
+            }}
+            defaultActiveKey={this.state.filterBy}
+            activeKey={this.state.filterBy}
+          >
+            <TabPane
+              tab={
+                <span>
+                  <Icon type="hdd" />
+                  Chứng từ theo loại
                 </span>
-                <Form.Item
-                  style={{ display: "inline-block", width: "calc(50% - 12px)" }}
-                >
-                  {getFieldDecorator("NgayChungTuKTTo", {
-                    rules: [],
-                  })(
-                    <DatePicker
-                      format="DD/MM/YYYY"
-                      placeholder={"Đến ngày:"}
-                      style={{ width: `100%` }}
-                      disabledDate={(NgayChungTuKTTo) => {
-                        let dateInCalendar = NgayChungTuKTTo?.startOf("day");
-                        const NgayChungTuKTFrom: moment.Moment =
-                          this.props.form.getFieldValue("NgayChungTuKTFrom");
-                        if (NgayChungTuKTFrom) {
-                          let selectedEndDate =
-                            NgayChungTuKTFrom.startOf("day");
-                          return !!(
-                            selectedEndDate &&
-                            dateInCalendar &&
-                            dateInCalendar < selectedEndDate
-                          );
-                        } else {
-                          return false;
-                        }
-                      }}
-                    />
-                  )}
-                </Form.Item>
-              </Form.Item>
-              <Form.Item label="Số chứng từ KT:">
-                {getFieldDecorator("SoChungTuKeToan", {})(<Input />)}
-              </Form.Item>
-            </div>
-            <div
-              className={
-                styles.searchDocuments__searchForm__form__wrapperByGroup
               }
-            >
-              <Form.Item label="Mã chứng khoán:">
-                {getFieldDecorator(
-                  "MaChungKhoanId",
-                  {}
-                )(
-                  <Select
-                    showSearch
-                    allowClear
-                    disabled={this.state.maCK?.length > 0 ? false : true}
-                  >
-                    {this.state.maCK?.map((item) => (
-                      <Select.Option value={item.Id} key={item.Id.toString()}>
-                        {item.MaChungKhoan}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                )}
-              </Form.Item>
-              <Form.Item label="Mã phiếu yêu cầu:">
-                {getFieldDecorator("RequestCode", {})(<Input />)}
-              </Form.Item>
-              <Form.Item label="TK ngân hàng:">
-                {getFieldDecorator(
-                  "TaiKhoanNganHangId",
-                  {}
-                )(
-                  <Select
-                    showSearch
-                    allowClear
-                    disabled={this.state.tKNH?.length > 0 ? false : true}
-                  >
-                    {this.state.tKNH?.map((item) => (
-                      <Select.Option value={item.Id} key={item.Id.toString()}>
-                        {item.SoTaiKhoan}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                )}
-              </Form.Item>
-            </div>
-          </Form>
-          <div className={styles.searchDocuments__searchForm__button}>
-            <Button
-              onClick={() => {
-                this.reset();
-              }}
-              className={
-                styles.searchDocuments__searchForm__button__buttonReset
+              key="SiteNhomChungTu"
+            ></TabPane>
+            <TabPane
+              tab={
+                <span>
+                  <Icon type="container" />
+                  Chứng từ lưu tạm
+                </span>
               }
-            >
-              Nhập lại
-            </Button>
-            <Button
-              onClick={() => {
-                this.getFormValue();
-              }}
-              icon="search"
-              className={
-                styles.searchDocuments__searchForm__button__buttonSearch
-              }
-            >
-              Tìm kiếm
-            </Button>
+              key="FolderChungTuLuuTam"
+            ></TabPane>
+          </Tabs>
+          <div
+            className={styles.searchDocuments__searchForm}
+            style={{ height: window.innerHeight - 300 }}
+          >
+            {" "}
+            {this.renderFormItem(getFieldDecorator, this.state.filterBy)}
           </div>
+        </Form>
+        <div className={styles.searchDocuments__searchForm__button}>
+          <Button
+            onClick={() => {
+              this.reset();
+            }}
+            className={styles.searchDocuments__searchForm__button__buttonReset}
+          >
+            Nhập lại
+          </Button>
+          <Button
+            onClick={() => {
+              this.getFormValue(this.state.filterBy);
+            }}
+            icon="search"
+            className={styles.searchDocuments__searchForm__button__buttonSearch}
+          >
+            Tìm kiếm
+          </Button>
         </div>
       </Spin>
     );

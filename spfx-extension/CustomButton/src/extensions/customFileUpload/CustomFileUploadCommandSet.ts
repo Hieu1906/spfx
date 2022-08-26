@@ -29,13 +29,15 @@ const LOG_SOURCE: string = "CustomFileUploadCommandSet";
 
 export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<ICustomFileUploadCommandSetProperties> {
   private panelDomElement: HTMLDivElement;
-  private canViewButton: boolean = false;
+  private canViewAddButton: boolean = false;
+  private canViewEditButton: boolean = false;
   @override
   public async onInit() {
     sp.setup({
       spfxContext: this.context,
     });
-    this.canViewButton = await this.checkShowButton();
+    this.canViewAddButton = await this.checkCanAddFile();
+    this.canViewEditButton=await this.checkCanEditFile();
     SPComponentLoader.loadCss(
       "https://cdnjs.cloudflare.com/ajax/libs/antd/3.26.19/antd.css"
     );
@@ -45,35 +47,45 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
     );
   }
 
-  async checkShowButton() {
+  async checkCanAddFile() {
     let doclib = sp.web.lists.getByTitle("ChungTuLuuTam");
 
-    const canViewButton = await doclib.currentUserHasPermissions(
+    const canViewAddButton = await doclib.currentUserHasPermissions(
       PermissionKind.AddListItems
     );
-    if (!canViewButton) {
+    if (!canViewAddButton) {
       console.log("Do not show custom buttons");
     }
-    return canViewButton;
+    return canViewAddButton;
+  }
+
+
+  async checkCanEditFile() {
+    let doclib = sp.web.lists.getByTitle("ChungTuLuuTam");
+
+    const canViewEditButton = await doclib.currentUserHasPermissions(
+      PermissionKind.EditListItems
+    );
+    if (!canViewEditButton) {
+      console.log("Do not show custom buttons");
+    }
+    return canViewEditButton;
   }
 
   @override
   public async onListViewUpdated(
     event: IListViewCommandSetListViewUpdatedParameters
   ) {
-    const compareOneCommand: Command = this.tryGetCommand("COMMAND_1");
+    const editFile: Command = this.tryGetCommand("COMMAND_1");
     const uploadFile: Command = this.tryGetCommand("COMMAND_2");
-    if (compareOneCommand) {
+    if (editFile) {
       // This command should be hidden unless exactly one row is selected.
-      compareOneCommand.visible =
-        event.selectedRows.length === 1 && this.canViewButton;
+      editFile.visible =
+        event.selectedRows.length === 1 && this.canViewEditButton&&this.checkVisible() ;
     }
     if (uploadFile) {
-      console.log("lolo");
-      console.log(this.checkVisible());
-      console.log(this.canViewButton);
       // This command should be hidden unless exactly one row is selected.
-      uploadFile.visible = this.checkVisible() && this.canViewButton;
+      uploadFile.visible = this.checkVisible() && this.canViewAddButton;
     }
   }
 

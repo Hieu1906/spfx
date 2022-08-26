@@ -1,8 +1,8 @@
 import * as React from "react";
 import * as ReactDom from "react-dom";
 import {
- IPropertyPaneConfiguration, PropertyPaneTextField,
- 
+  IPropertyPaneConfiguration,
+  PropertyPaneTextField,
 } from "@microsoft/sp-property-pane";
 
 import * as strings from "HomepageWebPartStrings";
@@ -11,9 +11,10 @@ import { IHomepageProps } from "./components/IHomepageProps";
 import { sp } from "@pnp/sp";
 import { SPComponentLoader } from "@microsoft/sp-loader";
 import { BaseClientSideWebPart } from "@microsoft/sp-webpart-base";
-
+import "jquery";
 export interface IHomepageWebPartProps {
   description: string;
+  wrapperClass: string;
 }
 
 export default class HomepageWebPart extends BaseClientSideWebPart<IHomepageWebPartProps> {
@@ -22,20 +23,24 @@ export default class HomepageWebPart extends BaseClientSideWebPart<IHomepageWebP
     sp.setup({
       spfxContext: this.context,
     });
-    console.log(this.context)
+    console.log(this.context);
     SPComponentLoader.loadCss(
       "https://cdnjs.cloudflare.com/ajax/libs/antd/3.26.19/antd.css"
     );
     SPComponentLoader.loadCss(
       `${this.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt/Shared%20Documents/hidenNavDefault.css`
-
     );
   }
   public render(): void {
+    if (this.properties.wrapperClass) {
+      console.log(this.properties.wrapperClass)
+      $(`.${this.properties.wrapperClass}`).css("max-width", "100%");
+    }
     const element: React.ReactElement<IHomepageProps> = React.createElement(
       Homepage,
       {
         description: this.properties.description,
+        wrapperClass: this.properties.wrapperClass,
         context: this.context,
       }
     );
@@ -60,6 +65,9 @@ export default class HomepageWebPart extends BaseClientSideWebPart<IHomepageWebP
               groupFields: [
                 PropertyPaneTextField("description", {
                   label: strings.DescriptionFieldLabel,
+                }),
+                PropertyPaneTextField("wrapperClass", {
+                  label: "Tên class bọc ngoài",
                 }),
               ],
             },

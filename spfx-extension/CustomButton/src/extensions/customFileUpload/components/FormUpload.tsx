@@ -287,6 +287,7 @@ export class FormUploadComp extends BaseComponent<
           .getByTitle("ChungTuLuuTam")
           .items.getById(item.Id)
           .update(itemSave);
+        window.location.reload();
       } catch (error) {
         message.error(
           "Đã có lỗi xảy ra trong quá trình thêm thuộc tính cho tài liệu",

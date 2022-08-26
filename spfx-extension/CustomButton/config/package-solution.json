@@ -3,7 +3,7 @@
   "solution": {
     "name": "custom-button-client-side-solution",
     "id": "9b017829-7962-491f-8b49-43b3a3b1985f",
-    "version": "1.0.0.2",
+    "version": "1.0.0.3",
     "includeClientSideAssets": true,
     "isDomainIsolated": false,
     "developer": {

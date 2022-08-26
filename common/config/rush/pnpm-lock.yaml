@@ -30,6 +30,7 @@ dependencies:
   ajv: 5.2.5
   antd: 3.26.20_react-dom@16.9.0+react@16.9.0
   gulp: 4.0.2
+  jquery: 3.5.1
   lodash: 4.17.21
   moment: 2.26.0
   office-ui-fabric-react: 6.214.0_7430236f8cedaf91633a6c8d58abd61d
@@ -10994,6 +10995,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-8wb9Yw966OSxApiCt0K3yNJL8pnNeIv+OEq2YMidz4FKP6nonSRoOXc80iXY4JaN2FC11B9qsNmDsm+ZOfMROA==
+  /jquery/3.5.1:
+    dev: false
+    resolution:
+      integrity: sha512-XwIBPqcMn57FxfT+Go5pzySnm4KWkT1Tv7gjrpT1srtf8Weynl6R273VJ5GjkRb51IzMp5nbaPjJXMWeju2MKg==
   /js-base64/2.6.4:
     dev: false
     resolution:
@@ -18587,6 +18592,7 @@ packages:
       ajv: 5.2.5
       antd: 3.26.20_react-dom@16.9.0+react@16.9.0
       gulp: 4.0.2
+      jquery: 3.5.1
       lodash: 4.17.21
       moment: 2.26.0
       office-ui-fabric-react: 6.214.0_7430236f8cedaf91633a6c8d58abd61d
@@ -18602,7 +18608,7 @@ packages:
     peerDependencies:
       webpack-cli: '*'
     resolution:
-      integrity: sha512-320/RJvWSCETshM5rDx6MMNPryM1infnkXxNqOqyTewAJMPNKshrtT/BIz9Khm78d1noWoc6tAQfowohBpXZ9g==
+      integrity: sha512-75abitup+BC50SXgPvSRHfIMcLDi20Nbn8MAy4U/pF/Y8qsoeDv6hQJKB29PSnTrvhdLBMYS+FOKrg6HAgpB4w==
       tarball: 'file:projects/01-webpart-layout.tgz'
     version: 0.0.0
   'file:projects/custom-button.tgz_a142bff42ba7602b9cea9ff398e50385':
@@ -18717,6 +18723,7 @@ specifiers:
   ajv: ~5.2.2
   antd: ^3.26.19
   gulp: 4.0.2
+  jquery: ~3.5.1
   lodash: ~4.17.21
   moment: ~2.26.0
   office-ui-fabric-react: 6.214.0
@@ -18727,4 +18734,4 @@ specifiers:
   typescript: 3.9.4
   uuid: ~8.3.2
   webpack-cli: 4.4.0
-# shrinkwrap hash: 0fc218abbd8a1f920d40059f5f3074c26d5bee1e
+# shrinkwrap hash: c6af373aca853deac0fdf226972b7de5bef0dc75
