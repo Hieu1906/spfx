@@ -116,6 +116,10 @@ const fieldCanReset = [
   "RequestCode",
   "TaiKhoanNganHangId",
   "ChungTuLuuTam",
+  "KeyWord",
+  "SoChungTuKeToan",
+  "LoaiChungTuId",
+  "NhomChungTuId"
 ];
 
 export class FormSearchComp extends BaseComponent<
@@ -152,11 +156,19 @@ export class FormSearchComp extends BaseComponent<
     // gọi lần đầu để láy các subsite đầu tiên từ kho chứng từ
 
     let filterBy = Global.Functions.getParameterByName("filterBy");
+    let keyword = Global.Functions.getParameterByName("keyword");
+    if (keyword) {
+      this.props.form.setFieldsValue({
+        KeyWord: keyword,
+      });
+    }
     if (filterBy == "FolderChungTuLuuTam") {
       await this.setState({
         filterBy: "FolderChungTuLuuTam",
       });
+    
       await this.loadMetaData();
+     
       this.getFormValue("FolderChungTuLuuTam");
     } else {
       await this.setState({
@@ -176,7 +188,7 @@ export class FormSearchComp extends BaseComponent<
   }
   async getInforByParam() {
     await this.getSiteNhomCTs();
-    let keyword = Global.Functions.getParameterByName("keyword");
+  
     let baseUrl = Global.Functions.getParameterByName("baseUrl");
     let urlSplitted = baseUrl.match("^[^?]*")![0].split("/");
     let year = urlSplitted[10] ? urlSplitted[10] : moment().year().toString();
@@ -219,11 +231,7 @@ export class FormSearchComp extends BaseComponent<
         Year: moment().year(),
       });
     }
-    if (keyword) {
-      this.props.form.setFieldsValue({
-        KeyWord: keyword,
-      });
-    }
+  
   }
 
   getFormValue(filterBy: "FolderChungTuLuuTam" | "SiteNhomChungTu") {
@@ -474,7 +482,6 @@ export class FormSearchComp extends BaseComponent<
       selectedPersons: [],
     });
     this.props.form.resetFields(fieldCanReset);
-    this.props.form.setFieldsValue({ Year: moment().year() });
     this.getFormValue(this.state.filterBy);
   }
 
@@ -488,7 +495,7 @@ export class FormSearchComp extends BaseComponent<
           <div
             className={styles.searchDocuments__searchForm__form__wrapperByGroup}
           >
-            <Form.Item label="Site nhóm chứng từ">
+            <Form.Item label="Nhóm chứng từ">
               {getFieldDecorator(
                 "SiteNhomCT",
                 {}
@@ -515,7 +522,7 @@ export class FormSearchComp extends BaseComponent<
                 </Select>
               )}
             </Form.Item>
-            <Form.Item label="Site loại chứng từ">
+            <Form.Item label="Loại chứng từ">
               {getFieldDecorator(
                 "SiteLoaiCT",
                 {}
@@ -922,16 +929,14 @@ export class FormSearchComp extends BaseComponent<
     if (key == "FolderChungTuLuuTam") {
       await this.loadMetaData();
       this.getFormValue(this.state.filterBy);
-     
     } else {
-
       await this.getInforByParam();
       await this.loadMetaData(
         this.props.form.getFieldValue("Year"),
         this.props.form.getFieldValue("SiteLoaiCT")
       );
     }
-    this.props.form.resetFields(fieldCanReset)
+    this.props.form.resetFields(fieldCanReset);
   }
 
   public render(): React.ReactElement<FormSearchProps> {

@@ -4,7 +4,7 @@
   "https": true,
   "serveConfigurations": {
     "default": {
-      "pageUrl": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/khoctkt/ChungTuLuuTam/Forms/AllItems.aspx",
+      "pageUrl": "https://1work.sharepoint.com/sites/ssisit/apps/rfa/khoctkt/ap-noi-bo/invoice/2022/08/Forms/AllItems.aspx?id=%2Fsites%2Fssisit%2Fapps%2Frfa%2Fkhoctkt%2Fap%2Dnoi%2Dbo%2Finvoice%2F2022%2F08%2FTU%5F2022%5F001475&viewid=19d34723%2D0342%2D44e0%2D91c2%2Dc9ed8a096da0&OR=Teams%2DHL&CT=1661842426537&clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiIyNy8yMjA3MzEwMTAwNSIsIkhhc0ZlZGVyYXRlZFVzZXIiOmZhbHNlfQ%3D%3D",
       "customActions": {
         "71b00e79-02fe-4c97-bb43-abfc827f0638": {
           "location": "ClientSideExtension.ListViewCommandSet.CommandBar",

@@ -151,8 +151,9 @@ export class FormUploadComp extends BaseComponent<
             formvalues,
             formValues.FileLeafRef
           );
-          window.location.reload();
-          await this.props.onclose();
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
         } catch (error) {
           message.error(
             "Đã có lỗi xảy ra trong quá trình cập nhật tài liệu",
@@ -250,6 +251,7 @@ export class FormUploadComp extends BaseComponent<
       this.setState({
         loading: false,
       });
+      this.props.onclose();
     }
   }
 
@@ -284,11 +286,11 @@ export class FormUploadComp extends BaseComponent<
         itemSave.extension = this.getExtension(nameFile);
 
         await sp.web.lists
-          .getByTitle("ChungTuLuuTam")
+          .getByTitle(this.props.context.pageContext.list.title)
           .items.getById(item.Id)
           .update(itemSave);
-        window.location.reload();
       } catch (error) {
+        console.log(error);
         message.error(
           "Đã có lỗi xảy ra trong quá trình thêm thuộc tính cho tài liệu",
           5
@@ -838,6 +840,7 @@ export class FormUploadComp extends BaseComponent<
                     onClick={async () => {
                       if (formValues) {
                         await this.updateFile();
+                        this.props.onclose();
                       } else {
                         await this.checkVadlidFile();
                       }

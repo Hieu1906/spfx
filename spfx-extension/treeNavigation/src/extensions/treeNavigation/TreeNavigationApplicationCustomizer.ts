@@ -26,6 +26,17 @@ export interface ITreeNavigationApplicationCustomizerProperties {
 export default class TreeNavigationApplicationCustomizer extends BaseApplicationCustomizer<ITreeNavigationApplicationCustomizerProperties> {
   @override
   public async onInit(): Promise<void> {
+    let urlCheck = `${this.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt`;
+    if (this.context.pageContext.web.absoluteUrl == urlCheck) {
+      if (this.context.pageContext?.list.title == "ChungTuLuuTam") {
+        await this.initExxtension();
+      }
+    } else {
+      await this.initExxtension();
+    }
+  }
+
+  async initExxtension() {
     super.onInit();
     sp.setup({
       spfxContext: this.context,
@@ -37,13 +48,10 @@ export default class TreeNavigationApplicationCustomizer extends BaseApplication
     );
     SPComponentLoader.loadCss(
       `${this.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt/Documents/hidenNavDefault.css`
-
     );
     SPComponentLoader.loadCss(
       `${this.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt/Shared%20Documents/hidenNavDefault.css`
     );
-
-    console.log(this.context);
 
     setTimeout(() => {
       this.context.placeholderProvider.changedEvent.add(

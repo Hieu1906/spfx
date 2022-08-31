@@ -5,7 +5,7 @@ import "@pnp/sp/items";
 import "@pnp/sp/lists";
 import "@pnp/sp/webs";
 
-import { Icon, message, Table, Tag } from "antd";
+import { Icon, message, Table, Tag, Tooltip } from "antd";
 import * as React from "react";
 import { BaseComponent } from "../../common/components/BaseComponent";
 import { FormSearch, FormSearchComp } from "./FormSearch";
@@ -37,7 +37,7 @@ interface ResultFile {
   TrangThai: boolean;
   extension: string;
   uuid: string;
-  NhomChungTu?: { NhomChungTu: string; ID: number };
+  NhomChungTu?: { TenNhomChungTu: string; ID: number };
   DuAn: { TenDuAn: string; ID: number };
   ChiNhanh: { TenChiNhanh: string; ID: number };
   LoaiChungTuKeToan: { TenLoaiChungTuKeToan: string; ID: number };
@@ -101,7 +101,7 @@ export default class SearchDocuments extends BaseComponent<
         "DuAn/ID",
         "NhaCungCap/TenNCC",
         "NhaCungCap/ID",
-        "NhomChungTu/NhomChungTu",
+        "NhomChungTu/TenNhomChungTu",
         "NhomChungTu/ID",
         "LoaiChungTu/TenLoaiChungTu",
         "LoaiChungTu/ID",
@@ -179,7 +179,7 @@ export default class SearchDocuments extends BaseComponent<
         `substringof('${trim(formvalues.RequestCode)}',RequestCode)`
       );
     }
-   
+
     if (formvalues.BoPhanThucHienId) {
       arrQuery.push(`BoPhanThucHienId eq ${formvalues?.BoPhanThucHienId}`);
     }
@@ -303,20 +303,12 @@ export default class SearchDocuments extends BaseComponent<
         width: 200,
         render: (text: string, record: ResultFile, index) =>
           record.RequestCode && (
-            <Tag color={"#dc0d15"} key={index}>
-              {record.RequestCode}
+            <Tag style={{ maxWidth: 200 }} color={"#dc0d15"} key={index}>
+              <Tooltip title={record.RequestCode}>{record.RequestCode}</Tooltip>
             </Tag>
           ),
       },
-      // {
-      //   title: "Nhóm chứng từ",
-      //   dataIndex: "NhomChungTuId",
-      //   key: "NhomChungTuId",
-      //   width: 200,
-      //   render: (text: string, record: ResultFile, index) => (
-      //     <p>{record.NhomChungTu?.NhomChungTu}</p>
-      //   ),
-      // },
+
       {
         title: "Số chứng từ",
         dataIndex: "SoChungTu",
@@ -324,8 +316,8 @@ export default class SearchDocuments extends BaseComponent<
         width: 200,
         render: (text: string, record: ResultFile, index) =>
           record.SoChungTu && (
-            <Tag color={"#dc0d15"} key={index}>
-              {record.SoChungTu}
+            <Tag style={{ maxWidth: 200 }} color={"#dc0d15"} key={index}>
+              <Tooltip title={record.SoChungTu}>{record.SoChungTu}</Tooltip>
             </Tag>
           ),
       },
@@ -351,8 +343,8 @@ export default class SearchDocuments extends BaseComponent<
         width: 200,
         render: (text: string, record: ResultFile, index) =>
           record.SoChungTu && (
-            <Tag color={"#dc0d15"} key={index}>
-              {record.SoChungTuKeToan}
+            <Tag style={{ maxWidth: 200 }} color={"#dc0d15"} key={index}>
+               <Tooltip title={record.SoChungTuKeToan}>{record.SoChungTuKeToan}</Tooltip>
             </Tag>
           ),
       },
@@ -412,16 +404,25 @@ export default class SearchDocuments extends BaseComponent<
           <p>{record.NhaCungCap?.TenNCC}</p>
         ),
       },
-      // {
-      //   title: "Loại chứng từ",
-      //   dataIndex: "LoaiChungTu",
-      //   key: "LoaiChungTuId",
-      //   width: 200,
+      {
+        title: "Loại chứng từ",
+        dataIndex: "LoaiChungTu",
+        key: "LoaiChungTuId",
+        width: 200,
 
-      //   render: (text: string, record: ResultFile, index) => (
-      //     <p>{record?.LoaiChungTu?.TenLoaiChungTu}</p>
-      //   ),
-      // },
+        render: (text: string, record: ResultFile, index) => (
+          <p>{record?.LoaiChungTu?.TenLoaiChungTu}</p>
+        ),
+      },
+      {
+        title: "Nhóm chứng từ",
+        dataIndex: "NhomChungTuId",
+        key: "NhomChungTuId",
+        width: 200,
+        render: (text: string, record: ResultFile, index) => (
+          <p>{record.NhomChungTu?.TenNhomChungTu}</p>
+        ),
+      },
       {
         title: "Loại chứng từ KT",
         dataIndex: "LoaiChungTuKeToan",
@@ -451,6 +452,7 @@ export default class SearchDocuments extends BaseComponent<
         ),
       },
     ];
+
     return columns;
   }
 

@@ -37,7 +37,7 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
       spfxContext: this.context,
     });
     this.canViewAddButton = await this.checkCanAddFile();
-    this.canViewEditButton=await this.checkCanEditFile();
+    this.canViewEditButton = await this.checkCanEditFile();
     SPComponentLoader.loadCss(
       "https://cdnjs.cloudflare.com/ajax/libs/antd/3.26.19/antd.css"
     );
@@ -58,7 +58,6 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
     }
     return canViewAddButton;
   }
-
 
   async checkCanEditFile() {
     let doclib = sp.web.lists.getByTitle("ChungTuLuuTam");
@@ -81,17 +80,35 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
     if (editFile) {
       // This command should be hidden unless exactly one row is selected.
       editFile.visible =
-        event.selectedRows.length === 1 && this.canViewEditButton&&this.checkVisible() ;
+        event.selectedRows.length === 1 &&
+        this.canViewEditButton &&
+        this.checkVisibleButtonEdit();
     }
     if (uploadFile) {
       // This command should be hidden unless exactly one row is selected.
-      uploadFile.visible = this.checkVisible() && this.canViewAddButton;
+      uploadFile.visible =
+        this.checkVisibleButtonAdd() && this.canViewAddButton;
     }
   }
 
-  checkVisible() {
-    return this.context.pageContext.list.title == "ChungTuLuuTam";
+  checkVisibleButtonEdit() {
+    let urlCheck = `${this.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt`;
+    if (this.context.pageContext.web.absoluteUrl == urlCheck) {
+      return this.context.pageContext.list.title == "ChungTuLuuTam";
+    } else {
+      return true;
+    }
   }
+
+  checkVisibleButtonAdd() {
+    let urlCheck = `${this.context.pageContext.site.absoluteUrl}/apps/rfa/khoctkt`;
+    if (this.context.pageContext.web.absoluteUrl == urlCheck) {
+      return this.context.pageContext.list.title == "ChungTuLuuTam";
+    } else {
+      return false;
+    }
+  }
+  
   _getformValuesFromFile(event: IListViewCommandSetExecuteEventParameters) {
     let formValues: FormValue = {} as any;
     let fieldsValue = event.selectedRows[0].fields;
@@ -119,6 +136,8 @@ export default class CustomFileUploadCommandSet extends BaseListViewCommandSet<I
 
     formValues.FileRef = event.selectedRows[0].getValueByName("FileRef");
     formValues.UniqueId = event.selectedRows[0].getValueByName("UniqueId");
+    formValues.FileLeafRef =
+      event.selectedRows[0].getValueByName("FileLeafRef");
 
     return formValues;
   }
